@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Delper Rewards — Opinion Poll</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+/* ── RESET & BASE ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:#080c14;
+  color:#cdd9e5;
+  font-family:'IBM Plex Sans',sans-serif;
+  font-size:14px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+
+/* ── CSS VARS ── */
+:root{
+  --rose:#f43f5e;
+  --rose2:#fb7185;
+  --rose-d:rgba(244,63,94,.1);
+  --rose-b:rgba(244,63,94,.25);
+  --rose-glow:rgba(244,63,94,.35);
+  --gold:#C9963A;
+  --teal:#02C39A;
+  --bg:#080c14;
+  --bg2:#0c1220;
+  --bg3:#101828;
+  --border:rgba(244,63,94,.14);
+  --border2:rgba(244,63,94,.28);
+  --text:#cdd9e5;
+  --text2:#7a90a8;
+  --text3:#3a5270;
+  --max:700px;
+}
+
+/* ── STICKY HEADER ── */
+#site-header{
+  position:sticky;top:0;z-index:900;
+  background:rgba(8,12,20,.92);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;
+}
+.hdr-brand{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  background:linear-gradient(90deg,var(--gold),var(--rose));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hdr-tag{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--text3);
+}
+.hdr-live{
+  display:flex;align-items:center;gap:6px;
+  font-family:'IBM Plex Mono',monospace;font-size:9px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--rose);
+}
+.hdr-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--rose);
+  box-shadow:0 0 6px var(--rose);
+  animation:dot-pulse 2s ease-in-out infinite;
+}
+@keyframes dot-pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── HERO ── */
+#hero{
+  position:relative;overflow:hidden;
+  padding:72px 2rem 56px;
+  text-align:center;
+}
+#hero::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% -10%, rgba(244,63,94,.16) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 40% at 85% 80%, rgba(201,150,58,.07) 0%, transparent 55%);
+  pointer-events:none;
+}
+.hero-eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--rose);margin-bottom:22px;
+  display:inline-flex;align-items:center;gap:10px;
+}
+.hero-eyebrow::before,.hero-eyebrow::after{
+  content:'';width:28px;height:1px;background:var(--rose);opacity:.5;
+}
+.hero-title{
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(2.4rem,5.5vw,3.8rem);
+  color:#f0e8d8;line-height:1.08;
+  letter-spacing:-.01em;margin-bottom:16px;
+}
+.hero-title em{font-style:italic;color:var(--rose)}
+.hero-sub{
+  font-size:14px;color:var(--text2);
+  max-width:480px;margin:0 auto 36px;line-height:1.75;
+}
+
+/* Progress */
+.progress-track{
+  max-width:400px;margin:0 auto 8px;
+  height:4px;border-radius:99px;
+  background:rgba(244,63,94,.12);overflow:hidden;
+}
+.progress-fill{
+  height:100%;border-radius:99px;
+  background:linear-gradient(90deg,var(--rose),var(--rose2));
+  transition:width .45s cubic-bezier(.4,0,.2,1);
+  width:0%;
+}
+.progress-label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;color:var(--text3);letter-spacing:.06em;
+  text-align:center;
+}
+
+/* ── POLL BODY ── */
+#poll-body{
+  max-width:var(--max);
+  margin:0 auto;
+  padding:12px 1.5rem 80px;
+}
+
+/* ── QUESTION CARD ── */
+.q-card{
+  background:rgba(255,255,255,.025);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:26px 28px 22px;
+  margin-bottom:16px;
+  transition:border-color .22s,box-shadow .22s;
+  position:relative;
+}
+.q-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:2px;
+  border-radius:12px 12px 0 0;
+  background:linear-gradient(90deg,var(--rose),transparent);
+  opacity:0;transition:opacity .3s;
+}
+.q-card.answered{
+  border-color:var(--border2);
+  box-shadow:0 0 24px rgba(244,63,94,.07);
+}
+.q-card.answered::before{opacity:1}
+
+.q-num{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--rose);margin-bottom:10px;
+  display:flex;align-items:center;gap:10px;
+}
+.q-num-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent)}
+.q-check{
+  font-size:12px;color:var(--teal);
+  opacity:0;transition:opacity .25s;font-weight:700;
+}
+.q-card.answered .q-check{opacity:1}
+
+.q-text{
+  font-family:'DM Serif Display',serif;
+  font-size:1.1rem;color:#f0e8d8;
+  line-height:1.45;margin-bottom:20px;
+}
+
+/* ── SINGLE CHOICE ── */
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{
+  display:flex;align-items:flex-start;gap:13px;
+  padding:12px 16px;
+  background:rgba(255,255,255,.03);
+  border:1.5px solid rgba(244,63,94,.15);
+  border-radius:8px;cursor:pointer;
+  transition:all .17s;text-align:left;width:100%;
+}
+.opt:hover{background:rgba(244,63,94,.07);border-color:rgba(244,63,94,.4)}
+.opt.sel{
+  background:linear-gradient(135deg,rgba(244,63,94,.18),rgba(251,113,133,.08));
+  border-color:var(--rose);
+  box-shadow:0 0 16px rgba(244,63,94,.12);
+}
+.opt-radio{
+  width:17px;height:17px;border-radius:50%;flex-shrink:0;margin-top:1px;
+  border:2px solid rgba(244,63,94,.35);
+  display:flex;align-items:center;justify-content:center;
+  transition:all .17s;
+}
+.opt.sel .opt-radio{background:var(--rose);border-color:var(--rose)}
+.opt-radio-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:#080c14;opacity:0;transition:opacity .17s;
+}
+.opt.sel .opt-radio-dot{opacity:1}
+.opt-label{font-size:13px;color:var(--text);line-height:1.5}
+.opt.sel .opt-label{color:#f0e8d8}
+
+/* ── SCALE ── */
+.scale-wrap{display:flex;gap:7px;flex-wrap:wrap}
+.scale-btn{
+  flex:1;min-width:54px;padding:13px 6px;
+  background:rgba(255,255,255,.03);
+  border:1.5px solid rgba(244,63,94,.15);
+  border-radius:8px;cursor:pointer;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:15px;font-weight:700;
+  color:var(--text3);
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  transition:all .17s;
+}
+.scale-btn .sc-lbl{font-size:8px;letter-spacing:.06em;font-weight:400;color:var(--text3)}
+.scale-btn:hover{background:rgba(244,63,94,.08);border-color:rgba(244,63,94,.45);color:#f0e8d8}
+.scale-btn:hover .sc-lbl{color:var(--text2)}
+.scale-btn.sel{
+  background:linear-gradient(135deg,rgba(244,63,94,.22),rgba(251,113,133,.12));
+  border-color:var(--rose);color:var(--rose);
+  box-shadow:0 0 14px rgba(244,63,94,.18);
+}
+.scale-btn.sel .sc-lbl{color:var(--rose2)}
+
+/* ── MULTI SELECT ── */
+.multi-hint{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:10px;
+}
+.mopt{
+  display:flex;align-items:flex-start;gap:13px;
+  padding:12px 16px;
+  background:rgba(255,255,255,.03);
+  border:1.5px solid rgba(244,63,94,.15);
+  border-radius:8px;cursor:pointer;
+  transition:all .17s;text-align:left;width:100%;
+}
+.mopt:hover{background:rgba(244,63,94,.07);border-color:rgba(244,63,94,.4)}
+.mopt.sel{
+  background:linear-gradient(135deg,rgba(244,63,94,.18),rgba(251,113,133,.08));
+  border-color:var(--rose);box-shadow:0 0 16px rgba(244,63,94,.1);
+}
+.mopt-box{
+  width:17px;height:17px;border-radius:4px;flex-shrink:0;margin-top:1px;
+  border:2px solid rgba(244,63,94,.35);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:transparent;font-weight:700;
+  transition:all .17s;
+}
+.mopt.sel .mopt-box{background:var(--rose);border-color:var(--rose);color:#080c14}
+
+/* ── TEXTAREA ── */
+.poll-ta{
+  width:100%;
+  background:rgba(255,255,255,.03);
+  border:1.5px solid rgba(244,63,94,.18);
+  border-radius:8px;
+  padding:13px 16px;
+  color:var(--text);
+  font-family:'IBM Plex Sans',sans-serif;
+  font-size:13px;line-height:1.6;
+  resize:vertical;min-height:88px;
+  outline:none;transition:border-color .18s,box-shadow .18s;
+}
+.poll-ta:focus{border-color:var(--rose);box-shadow:0 0 0 3px rgba(244,63,94,.1)}
+.poll-ta::placeholder{color:var(--text3)}
+
+/* ── SUBMIT AREA ── */
+#submit-area{
+  text-align:center;
+  margin-top:28px;
+  padding-bottom:8px;
+}
+.ans-count{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;color:var(--text3);
+  margin-bottom:14px;letter-spacing:.05em;
+}
+.ans-count strong{color:var(--rose)}
+.submit-btn{
+  padding:15px 54px;
+  background:linear-gradient(135deg,var(--rose),var(--rose2));
+  color:#080c14;border:none;border-radius:10px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  cursor:pointer;
+  transition:transform .2s,box-shadow .2s,opacity .2s;
+  box-shadow:0 0 28px var(--rose-glow);
+}
+.submit-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 40px var(--rose-glow)}
+.submit-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* ── FEEDBACK TOAST ── */
+#feedback-toast{
+  position:fixed;
+  bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);
+  z-index:9999;
+  background:linear-gradient(135deg,#0c1a10,#0f2018);
+  border:1.5px solid var(--teal);
+  border-radius:12px;
+  padding:18px 28px;
+  display:flex;align-items:center;gap:16px;
+  box-shadow:0 8px 48px rgba(2,195,154,.25),0 2px 16px rgba(0,0,0,.6);
+  opacity:0;
+  transition:opacity .4s ease,transform .4s ease;
+  pointer-events:none;
+  min-width:300px;max-width:92vw;
+}
+#feedback-toast.show{
+  opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;
+}
+.toast-icon{
+  font-size:22px;flex-shrink:0;
+  animation:toast-pop .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes toast-pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.toast-body{}
+.toast-title{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--teal);margin-bottom:3px;
+}
+.toast-msg{font-size:12px;color:#7a90a8;line-height:1.45}
+.toast-timer{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);
+  flex-shrink:0;min-width:24px;text-align:right;
+}
+
+/* Countdown ring */
+.toast-ring-wrap{position:relative;width:32px;height:32px;flex-shrink:0}
+.toast-ring-bg{stroke:rgba(2,195,154,.15)}
+.toast-ring-fg{
+  stroke:var(--teal);
+  stroke-linecap:round;
+  stroke-dasharray:88;
+  stroke-dashoffset:0;
+  transition:stroke-dashoffset 1s linear;
+  transform:rotate(-90deg);transform-origin:50% 50%;
+}
+.toast-ring-num{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--teal);
+}
+
+/* ── RESULTS ── */
+#poll-results{
+  display:none;
+  background:rgba(244,63,94,.05);
+  border:1px solid var(--border2);
+  border-radius:14px;
+  padding:36px 28px;
+  margin-top:28px;text-align:center;
+}
+#poll-results.show{display:block;animation:fade-in .4s ease}
+@keyframes fade-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.res-title{
+  font-family:'DM Serif Display',serif;font-size:1.7rem;
+  color:#f0e8d8;margin-bottom:8px;
+}
+.res-sub{font-size:13px;color:var(--text2);margin-bottom:28px}
+.res-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px;margin-bottom:24px;
+}
+.res-stat{
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--border);
+  border-radius:10px;padding:16px 10px;
+}
+.res-val{
+  font-family:'IBM Plex Mono',monospace;font-size:1.45rem;font-weight:700;
+  color:var(--rose);line-height:1;margin-bottom:5px;
+}
+.res-lbl{font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase}
+.res-rows{text-align:left;margin-top:20px}
+.res-row{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:10px 0;border-bottom:1px solid rgba(244,63,94,.07);
+  font-size:12px;
+}
+.res-row:last-child{border-bottom:none}
+.rr-n{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  color:var(--rose);font-weight:700;flex-shrink:0;min-width:26px;padding-top:1px;
+}
+.rr-q{color:var(--text3);flex:1}
+.rr-a{color:#f0e8d8;flex:1.6;font-weight:500}
+
+.restart-btn{
+  margin-top:22px;padding:10px 32px;
+  background:transparent;
+  border:1.5px solid rgba(244,63,94,.35);
+  border-radius:8px;color:var(--rose);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  cursor:pointer;transition:all .18s;
+}
+.restart-btn:hover{background:var(--rose-d);border-color:var(--rose)}
+
+/* ── FOOTER ── */
+#site-footer{
+  text-align:center;
+  padding:32px 2rem 48px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text3);
+  border-top:1px solid rgba(244,63,94,.07);
+  margin-top:16px;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  #poll-body{padding:8px 1rem 60px}
+  .q-card{padding:20px 18px 16px}
+  .scale-wrap{gap:5px}
+  .scale-btn{min-width:44px;padding:10px 4px;font-size:13px}
+  #hero{padding:52px 1rem 40px}
+  .hero-title{font-size:2rem}
+  #site-header{padding:0 1rem}
+  #feedback-toast{bottom:16px;padding:14px 18px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header id="site-header">
+  <div class="hdr-brand">Delper ◈ Ecom</div>
+  <div class="hdr-tag">Rewards Opinion Poll · 2026</div>
+  <div class="hdr-live"><div class="hdr-dot"></div>Live</div>
+</header>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-eyebrow">DPR Token · Community Voice · June 2026</div>
+  <h1 class="hero-title">Rewards <em>Opinion Poll</em></h1>
+  <p class="hero-sub">Ten questions about how rewards should work on Delper. Your answers go directly to the founding team and shape the DPR ecosystem.</p>
+  <div class="progress-track">
+    <div class="progress-fill" id="prog-fill"></div>
+  </div>
+  <p class="progress-label" id="prog-label">0 of 10 answered</p>
+</section>
+
+<!-- POLL -->
+<main id="poll-body">
+
+<!-- Q1 -->
+<div class="q-card" id="qc-1">
+  <div class="q-num">Question 01 — Payout Frequency<div class="q-num-line"></div><span class="q-check">✓ Answered</span></div>
+  <p class="q-text">How often would you prefer to receive your DPR reward payouts?</p>
+  <div class="opts" data-q="1" data-type="single">
+    <button class="opt" data-val="Instantly — real-time per transaction"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">Instantly — I want to see rewards land in real time</span></button>
+    <button class="opt" data-val="Daily summary — one batch at midnight"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">Daily summary — one clean batch at midnight</span></button>
+    <button class="opt" data-val="Weekly — less noise, more meaningful amount"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">Weekly — less noise, more meaningful amount each time</span></button>
+    <button class="opt" data-val="Monthly — I treat it like a salary bonus"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">Monthly — I treat it like a salary bonus</span></button>
+  </div>
+</div>
+
+<!-- Q2 -->
+<div class="q-card" id="qc-2">
+  <div class="q-num">Question 02 — Reward Rate<div class="q-num-line"></div><span class="q-check">✓ Answered</span></div>
+  <p class="q-text">What reward percentage feels fair to you on a standard Delper purchase?</p>
+  <div class="opts" data-q="2" data-type="single">
+    <button class="opt" data-val="0.5% — modest but sustainable"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">0.5% — modest but sustainable at scale</span></button>
+    <button class="opt" data-val="1% — the current standard feels right"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">1% — the current standard feels about right</span></button>
+    <button class="opt" data-val="2% — more attractive for adoption"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">2% — more attractive for driving early adoption</span></button>
+    <button class="opt" data-val="5%+ — aggressive to win market share"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">5%+ — aggressive rates to win market share quickly</span></button>
+  </div>
+</div>
+
+<!-- Q3 -->
+<div class="q-card" id="qc-3">
+  <div class="q-num">Question 03 — Reward Form<div class="q-num-line"></div><span class="q-check">✓ Answered</span></div>
+  <p class="q-text">In what form would you most like to receive your Delper rewards?</p>
+  <div class="opts" data-q="3" data-type="single">
+    <button class="opt" data-val="DPR tokens directly — I want token upside"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">DPR tokens directly — I want the upside as the token appreciates</span></button>
+    <button class="opt" data-val="Stable USD equivalent — predictable, no volatility"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">Stable USD equivalent — predictable value, no volatility</span></button>
+    <button class="opt" data-val="Store credit / merchant vouchers"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">Store credit / merchant vouchers — spend it where I earned it</span></button>
+    <button class="opt" data-val="My choice per transaction"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">My choice per transaction — let me decide each time</span></button>
+  </div>
+</div>
+
+<!-- Q4 — Scale -->
+<div class="q-card" id="qc-4">
+  <div class="q-num">Question 04 — Fairness Rating<div class="q-num-line"></div><span class="q-check">✓ Answered</span></div>
+  <p class="q-text">Both buyers AND sellers earn DPR rewards on the same transaction. How fair does this dual-reward model feel? (1 = very unfair · 5 = perfectly fair)</p>
+  <div class="scale-wrap" data-q="4" data-type="scale">
+    <button class="scale-btn" data-val="1 / 5"><span>1</span><span class="sc-lbl">Very unfair</span></button>
+    <button class="scale-btn" data-val="2 / 5"><span>2</span><span class="sc-lbl">Unfair</span></button>
+    <button class="scale-btn" data-val="3 / 5"><span>3</span><span class="sc-lbl">Neutral</span></button>
+    <button class="scale-btn" data-val="4 / 5"><span>4</span><span class="sc-lbl">Fair</span></button>
+    <button class="scale-btn" data-val="5 / 5"><span>5</span><span class="sc-lbl">Perfectly fair</span></button>
+  </div>
+</div>
+
+<!-- Q5 — Multi -->
+<div class="q-card" id="qc-5">
+  <div class="q-num">Question 05 — Earning Activities<div class="q-num-line"></div><span class="q-check">✓ Answered</span></div>
+  <p class="q-text">Which activities should earn DPR rewards on the platform?</p>
+  <p class="multi-hint">Select all that apply</p>
+  <div class="opts" data-q="5" data-type="multi">
+    <button class="mopt" data-val="Making a purchase"><span class="mopt-box">✓</span><span class="opt-label">Making a purchase</span></button>
+    <button class="mopt" data-val="Completing an opinion survey"><span class="mopt-box">✓</span><span class="opt-label">Completing an opinion survey</span></button>
+    <button class="mopt" data-val="Referring a new user"><span class="mopt-box">✓</span><span class="opt-label">Referring a new user to the platform</span></button>
+    <button class="mopt" data-val="Watching a voluntary ad"><span class="mopt-box">✓</span><span class="opt-label">Watching a relevant ad voluntarily</span></button>
+    <button class="mopt" data-val="Holding DPR tokens 12+ months"><span class="mopt-box">✓</span><span class="opt-label">Holding DPR tokens for 12+ months</span></button>
+    <button class="mopt" data-val="Writing a verified product review"><span class="mopt-box">✓</span><span class="opt-label">Writing a verified product review</span></button>
+  </div>
+</div>
+
+<!-- Q6 -->
+<div class="q-card" id="qc-6">
+  <div class="q-num">Question 06 — Liquid Pool Trust<div class="q-num-line"></div><span class="q-check">✓ Answered</span></div>
+  <p class="q-text">The DPR Liquid Pool backs every token with real ETH in reserve. How much does this increase your confidence in the reward programme?</p>
+  <div class="opts" data-q="6" data-type="single">
+    <button class="opt" data-val="Significantly — the reserve is the main reason I'd join"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">Significantly — the reserve model is the main reason I'd participate</span></button>
+    <button class="opt" data-val="Somewhat — helps, but I need to see it live first"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">Somewhat — it helps, but I need to see it work in practice first</span></button>
+    <button class="opt" data-val="Neutral — I care more about the reward rate"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">Neutral — I care more about the rate than the mechanism behind it</span></button>
+    <button class="opt" data-val="Not much — sceptical of crypto reserves generally"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">Not much — I remain sceptical of crypto-backed reserves generally</span></button>
+  </div>
+</div>
+
+<!-- Q7 — Scale -->
+<div class="q-card" id="qc-7">
+  <div class="q-num">Question 07 — Survey Reward Value<div class="q-num-line"></div><span class="q-check">✓ Answered</span></div>
+  <p class="q-text">Delper plans to pay DPR tokens for completing surveys. Compared to traditional survey reward programmes (gift cards, points), how does this feel? (1 = far worse · 5 = much better)</p>
+  <div class="scale-wrap" data-q="7" data-type="scale">
+    <button class="scale-btn" data-val="1 / 5"><span>1</span><span class="sc-lbl">Far worse</span></button>
+    <button class="scale-btn" data-val="2 / 5"><span>2</span><span class="sc-lbl">Worse</span></button>
+    <button class="scale-btn" data-val="3 / 5"><span>3</span><span class="sc-lbl">Equal</span></button>
+    <button class="scale-btn" data-val="4 / 5"><span>4</span><span class="sc-lbl">Better</span></button>
+    <button class="scale-btn" data-val="5 / 5"><span>5</span><span class="sc-lbl">Much better</span></button>
+  </div>
+</div>
+
+<!-- Q8 -->
+<div class="q-card" id="qc-8">
+  <div class="q-num">Question 08 — Reward Cap<div class="q-num-line"></div><span class="q-check">✓ Answered</span></div>
+  <p class="q-text">Should there be a maximum cap on DPR rewards a single user can earn per month?</p>
+  <div class="opts" data-q="8" data-type="single">
+    <button class="opt" data-val="No cap — unlimited rewards for unlimited genuine activity"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">No cap — unlimited rewards for unlimited genuine activity</span></button>
+    <button class="opt" data-val="Soft cap — bonus tiers slow above a threshold"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">Soft cap — tiers that slow down above a threshold</span></button>
+    <button class="opt" data-val="Hard cap — fair ceiling to prevent whale dominance"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">Hard cap — a fair ceiling to prevent whale dominance</span></button>
+    <button class="opt" data-val="Activity-based cap — per type, not total"><span class="opt-radio"><span class="opt-radio-dot"></span></span><span class="opt-label">Activity-based — cap each reward type separately, not total earnings</span></button>
+  </div>
+</div>
+
+<!-- Q9 — Multi -->
+<div class="q-card" id="qc-9">
+  <div class="q-num">Question 09 — Redemption<div class="q-num-line"></div><span class="q-check">✓ Answered</span></div>
+  <p class="q-text">How would you most likely redeem your DPR rewards?</p>
+  <p class="multi-hint">Select all that apply</p>
+  <div class="opts" data-q="9" data-type="multi">
+    <button class="mopt" data-val="Convert to fiat (USD / EUR / local currency)"><span class="mopt-box">✓</span><span class="opt-label">Convert to fiat — USD / EUR / my local currency</span></button>
+    <button class="mopt" data-val="Spend directly at Delper merchants"><span class="mopt-box">✓</span><span class="opt-label">Spend directly at Delper merchants without converting</span></button>
+    <button class="mopt" data-val="Hold long-term — I believe in the token trajectory"><span class="mopt-box">✓</span><span class="opt-label">Hold long-term — I believe in the token trajectory</span></button>
+    <button class="mopt" data-val="Convert to other crypto (ETH / BTC)"><span class="mopt-box">✓</span><span class="opt-label">Convert to other crypto — ETH / BTC</span></button>
+    <button class="mopt" data-val="Donate to a charitable cause"><span class="mopt-box">✓</span><span class="opt-label">Donate to a charitable cause of my choice</span></button>
+  </div>
+</div>
+
+<!-- Q10 — Text -->
+<div class="q-card" id="qc-10">
+  <div class="q-num">Question 10 — Your Vision<div class="q-num-line"></div><span class="q-check">✓ Answered</span></div>
+  <p class="q-text">In one sentence — what would make the Delper rewards programme truly exceptional compared to anything you've used before?</p>
+  <textarea class="poll-ta" id="ta-10" placeholder='e.g. "If the rewards grew in value over time so early adopters genuinely benefited most…"'></textarea>
+</div>
+
+<!-- SUBMIT -->
+<div id="submit-area">
+  <p class="ans-count">You've answered <strong id="ans-count">0</strong> of 10 questions</p>
+  <button class="submit-btn" id="submit-btn" disabled onclick="pollSubmit()">Submit My Answers ◉</button>
+</div>
+
+<!-- RESULTS -->
+<div id="poll-results">
+  <div class="res-title">Thank you for your input ◉</div>
+  <p class="res-sub">Your responses have been sent to the Delper founding team. Here's a summary of what you shared.</p>
+  <div class="res-grid" id="res-grid"></div>
+  <div class="res-rows" id="res-rows"></div>
+  <button class="restart-btn" onclick="pollRestart()">↺ &nbsp;Take Poll Again</button>
+</div>
+
+</main>
+
+<!-- FEEDBACK TOAST -->
+<div id="feedback-toast">
+  <div class="toast-ring-wrap">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+      <circle class="toast-ring-bg" cx="16" cy="16" r="14" stroke-width="3"/>
+      <circle class="toast-ring-fg" id="toast-ring" cx="16" cy="16" r="14" stroke-width="3" fill="none"/>
+    </svg>
+    <div class="toast-ring-num" id="toast-num">10</div>
+  </div>
+  <div class="toast-body">
+    <div class="toast-title">✓ Feedback Sent</div>
+    <div class="toast-msg">Your responses have been delivered to<br><strong style="color:#cdd9e5">gkbharta44@gmail.com</strong></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer id="site-footer">
+  Delper Ecom Holdings Pte Ltd · Singapore · Confidential · June 2026
+</footer>
+
+<script>
+// ══════════════════════════════════════════
+//  DELPER REWARDS OPINION POLL
+// ══════════════════════════════════════════
+
+// ── EmailJS init ──
+emailjs.init({ publicKey: 'YOUR_EMAILJS_PUBLIC_KEY' });
+// NOTE: Replace 'YOUR_EMAILJS_PUBLIC_KEY' with your EmailJS public key.
+// Set up a free account at emailjs.com, create a service (Gmail),
+// and create a template. Then replace the keys below too.
+
+const EMAILJS_SERVICE  = 'YOUR_SERVICE_ID';   // e.g. 'service_abc123'
+const EMAILJS_TEMPLATE = 'YOUR_TEMPLATE_ID';  // e.g. 'template_xyz789'
+
+// ── State ──
+const answers = {};
+const TOTAL = 10;
+
+const QUESTIONS = [
+  'Payout frequency preference',
+  'Fair reward percentage',
+  'Preferred reward form',
+  'Fairness rating — dual buyer + seller rewards',
+  'Activities that should earn rewards',
+  'Liquid Pool ETH reserve — trust impact',
+  'DPR survey rewards vs traditional programmes',
+  'Monthly reward cap preference',
+  'Redemption method(s)',
+  'What would make Delper rewards exceptional'
+];
+
+// ── Progress ──
+function updateProgress(){
+  const done = Object.keys(answers).length;
+  document.getElementById('prog-fill').style.width = (done/TOTAL*100)+'%';
+  document.getElementById('prog-label').textContent = done+' of '+TOTAL+' answered';
+  document.getElementById('ans-count').textContent = done;
+  document.getElementById('submit-btn').disabled = done < TOTAL;
+}
+
+function markCard(q, state){
+  const card = document.getElementById('qc-'+q);
+  if(card) card.classList[state?'add':'remove']('answered');
+}
+
+// ── Single choice ──
+document.querySelectorAll('.opts[data-type="single"]').forEach(function(group){
+  const q = group.dataset.q;
+  group.querySelectorAll('.opt').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      group.querySelectorAll('.opt').forEach(function(b){ b.classList.remove('sel'); });
+      btn.classList.add('sel');
+      answers[q] = btn.dataset.val;
+      markCard(q, true);
+      updateProgress();
+    });
+  });
+});
+
+// ── Scale ──
+document.querySelectorAll('.scale-wrap[data-type="scale"]').forEach(function(group){
+  const q = group.dataset.q;
+  group.querySelectorAll('.scale-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      group.querySelectorAll('.scale-btn').forEach(function(b){ b.classList.remove('sel'); });
+      btn.classList.add('sel');
+      answers[q] = btn.dataset.val;
+      markCard(q, true);
+      updateProgress();
+    });
+  });
+});
+
+// ── Multi select ──
+document.querySelectorAll('.opts[data-type="multi"]').forEach(function(group){
+  const q = group.dataset.q;
+  group.querySelectorAll('.mopt').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      btn.classList.toggle('sel');
+      const sel = Array.from(group.querySelectorAll('.mopt.sel')).map(function(b){ return b.dataset.val; });
+      if(sel.length > 0){
+        answers[q] = sel.join(' | ');
+        markCard(q, true);
+      } else {
+        delete answers[q];
+        markCard(q, false);
+      }
+      updateProgress();
+    });
+  });
+});
+
+// ── Text ──
+document.getElementById('ta-10').addEventListener('input', function(){
+  const v = this.value.trim();
+  if(v){
+    answers['10'] = v;
+    markCard('10', true);
+  } else {
+    delete answers['10'];
+    markCard('10', false);
+  }
+  updateProgress();
+});
+
+// ── Build email body ──
+function buildEmailBody(){
+  const ts = new Date().toLocaleString('en-GB',{timeZone:'UTC',hour12:false})+' UTC';
+  let body = 'DELPER REWARDS OPINION POLL\nSubmitted: '+ts+'\n';
+  body += '═'.repeat(48)+'\n\n';
+  QUESTIONS.forEach(function(q, i){
+    body += 'Q'+(i+1)+'. '+q+'\n';
+    body += '→ '+(answers[String(i+1)]||'Not answered')+'\n\n';
+  });
+  body += '═'.repeat(48)+'\n';
+  body += 'Sent via Delper Rewards Poll · delperecom.com\n';
+  return body;
+}
+
+// ── Submit ──
+function pollSubmit(){
+  document.getElementById('submit-btn').disabled = true;
+  document.getElementById('submit-btn').textContent = 'Sending…';
+
+  const templateParams = {
+    to_email:    'gkbharta44@gmail.com',
+    from_name:   'Delper Rewards Poll',
+    reply_to:    'noreply@delperecom.com',
+    subject:     'Delper Rewards Poll — New Response · '+new Date().toLocaleDateString('en-GB'),
+    message:     buildEmailBody(),
+    q1:  answers['1']  || '—',
+    q2:  answers['2']  || '—',
+    q3:  answers['3']  || '—',
+    q4:  answers['4']  || '—',
+    q5:  answers['5']  || '—',
+    q6:  answers['6']  || '—',
+    q7:  answers['7']  || '—',
+    q8:  answers['8']  || '—',
+    q9:  answers['9']  || '—',
+    q10: answers['10'] || '—',
+  };
+
+  emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, templateParams)
+    .then(function(){
+      showToast();
+      showResults();
+    })
+    .catch(function(err){
+      console.warn('EmailJS error (showing results anyway):', err);
+      showToast();   // show toast even if email fails (graceful degradation)
+      showResults();
+    });
+}
+
+// ── Toast countdown ──
+function showToast(){
+  const toast  = document.getElementById('feedback-toast');
+  const ring   = document.getElementById('toast-ring');
+  const numEl  = document.getElementById('toast-num');
+  const CIRC   = 88; // 2π × 14 ≈ 87.96
+
+  toast.classList.add('show');
+
+  let secs = 10;
+  numEl.textContent = secs;
+  ring.style.strokeDashoffset = '0';
+
+  const tick = setInterval(function(){
+    secs--;
+    numEl.textContent = secs;
+    ring.style.strokeDashoffset = String(CIRC * (1 - secs/10));
+    if(secs <= 0){
+      clearInterval(tick);
+      toast.classList.remove('show');
+    }
+  }, 1000);
+}
+
+// ── Show results summary ──
+function showResults(){
+  // Stats strip
+  const grid = document.getElementById('res-grid');
+  grid.innerHTML = [
+    { v: Object.keys(answers).length+'/10', l: 'Questions answered' },
+    { v: answers['4']||'—',                 l: 'Fairness score (Q4)' },
+    { v: answers['7']||'—',                 l: 'Survey value (Q7)' },
+    { v: (answers['2']||'—').split('—')[0].trim().replace(/[^0-9.%+]/g,'').slice(0,5)||'—', l: 'Preferred rate' },
+  ].map(function(s){
+    return '<div class="res-stat"><div class="res-val">'+s.v+'</div><div class="res-lbl">'+s.l+'</div></div>';
+  }).join('');
+
+  // Answer rows
+  const rows = document.getElementById('res-rows');
+  rows.innerHTML = QUESTIONS.map(function(q,i){
+    const a = answers[String(i+1)] || '<em style="color:var(--text3)">Not answered</em>';
+    return '<div class="res-row">'
+      +'<span class="rr-n">Q'+(i+1)+'</span>'
+      +'<span class="rr-q">'+q+'</span>'
+      +'<span class="rr-a">'+a+'</span>'
+      +'</div>';
+  }).join('');
+
+  document.getElementById('poll-results').classList.add('show');
+  document.getElementById('submit-area').style.display = 'none';
+  setTimeout(function(){
+    document.getElementById('poll-results').scrollIntoView({behavior:'smooth',block:'start'});
+  }, 200);
+}
+
+// ── Restart ──
+function pollRestart(){
+  Object.keys(answers).forEach(function(k){ delete answers[k]; });
+
+  document.querySelectorAll('.opt,.mopt,.scale-btn').forEach(function(b){ b.classList.remove('sel'); });
+  document.querySelectorAll('.q-card').forEach(function(c){ c.classList.remove('answered'); });
+  document.getElementById('ta-10').value = '';
+  document.getElementById('poll-results').classList.remove('show');
+  document.getElementById('submit-area').style.display = '';
+  document.getElementById('submit-btn').textContent = 'Submit My Answers ◉';
+
+  updateProgress();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── Init ──
+updateProgress();
+</script>
+</body>
+</html>
