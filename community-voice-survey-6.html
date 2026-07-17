@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community Voice — Local Feedback Survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1D2B28;
+    --paper:#F6F5F0;
+    --panel:#FFFFFF;
+    --forest:#1F5C4E;
+    --forest-dark:#123D33;
+    --line:#DDD9CC;
+    --muted:#5C6560;
+    --warn-bg:#FBF3E4;
+    --warn-line:#C99A3E;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter','Noto Sans',sans-serif;
+    line-height:1.55;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:28px 18px 70px;}
+
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:16px;
+    flex-wrap:wrap;
+    border-bottom:3px solid var(--forest);
+    padding-bottom:20px;
+  }
+  h1{
+    font-family:'Source Serif 4',serif;
+    font-size:1.7rem;
+    font-weight:700;
+    color:var(--forest-dark);
+    margin:0 0 4px;
+  }
+  .kicker{
+    font-size:12px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--muted);
+    font-weight:600;
+  }
+  .lang-picker{display:flex;flex-direction:column;gap:6px;min-width:230px;}
+  .lang-picker label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;}
+  select{
+    font-family:inherit;
+    font-size:14px;
+    padding:9px 10px;
+    border:1.5px solid var(--forest);
+    background:var(--panel);
+    color:var(--ink);
+    border-radius:6px;
+    cursor:pointer;
+  }
+  select:focus-visible{outline:2px solid var(--forest-dark);outline-offset:2px;}
+
+  .status-line{font-size:12px;color:var(--muted);margin-top:4px;min-height:16px;}
+
+  section.card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    margin-top:22px;
+    overflow:hidden;
+  }
+  .card-hdr{
+    background:var(--forest);
+    color:#fff;
+    padding:12px 18px;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:0.03em;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+  }
+  .speak-btn{
+    background:rgba(255,255,255,0.16);
+    color:#fff;
+    border:1px solid rgba(255,255,255,0.5);
+    border-radius:6px;
+    font-size:12px;
+    padding:5px 10px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    flex-shrink:0;
+    font-family:inherit;
+  }
+  .speak-btn:hover{background:rgba(255,255,255,0.3);}
+  .speak-btn:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+  .q-speak-btn{
+    background:none;
+    border:1.5px solid var(--forest);
+    color:var(--forest);
+    border-radius:50%;
+    width:26px;height:26px;
+    font-size:12px;
+    cursor:pointer;
+    flex-shrink:0;
+    margin-left:6px;
+  }
+  .q-speak-btn:hover{background:var(--forest);color:#fff;}
+
+  .keyboard-note{
+    font-size:12px;
+    color:var(--muted);
+    background:#F0F5F1;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:8px 10px;
+    margin-top:8px;
+    line-height:1.5;
+  }
+  .textarea-wrap{position:relative;}
+  .mic-btn{
+    position:absolute;
+    right:8px;
+    bottom:10px;
+    width:34px;height:34px;
+    border-radius:50%;
+    border:1.5px solid var(--forest);
+    background:#fff;
+    color:var(--forest);
+    font-size:15px;
+    cursor:pointer;
+  }
+  .mic-btn.recording{background:#C0392B;border-color:#C0392B;color:#fff;animation:pulse 1s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(192,57,43,0.5);}100%{box-shadow:0 0 0 10px rgba(192,57,43,0);}}
+  .mic-unsupported{font-size:11.5px;color:var(--muted);margin-top:6px;font-style:italic;}
+
+  .send-section{margin-top:16px;padding-top:16px;border-top:1px dashed var(--line);}
+  .send-note{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6;}
+  .card-body{padding:18px 20px;}
+
+  .placeholder-note{
+    background:var(--warn-bg);
+    border:1px solid var(--warn-line);
+    border-radius:8px;
+    padding:12px 16px;
+    font-size:13px;
+    color:#5a4315;
+    margin-bottom:18px;
+  }
+  .placeholder-note b{color:#3f2f0e;}
+
+  .bilingual-row{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:4px 22px;
+    padding:12px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .bilingual-row:last-child{border-bottom:none;}
+  .bilingual-row.two-col{grid-template-columns:1fr 1fr;}
+  @media (max-width:640px){
+    .bilingual-row.two-col{grid-template-columns:1fr;}
+  }
+  .en-text{font-size:14.5px;color:var(--ink);}
+  .native-text{
+    font-size:15px;
+    color:var(--forest-dark);
+    font-weight:500;
+  }
+  .native-text.loading{color:var(--muted);font-style:italic;font-weight:400;}
+  .col-label{font-size:10.5px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:700;margin-bottom:2px;}
+
+  .disclosure-item{margin-bottom:18px;}
+  .disclosure-item:last-child{margin-bottom:0;}
+
+  .consent-box{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    background:#F0F5F1;
+    border:1px solid var(--forest);
+    border-radius:8px;
+    padding:14px 16px;
+    margin-top:18px;
+  }
+  .consent-box input{margin-top:3px;width:17px;height:17px;accent-color:var(--forest);flex-shrink:0;}
+  .consent-box .native-text{margin-top:2px;}
+
+  .q-block{margin-bottom:22px;}
+  .q-block:last-child{margin-bottom:0;}
+  .q-num{
+    display:inline-flex;
+    align-items:center;justify-content:center;
+    width:24px;height:24px;
+    border-radius:50%;
+    background:var(--forest);
+    color:#fff;
+    font-size:12px;font-weight:700;
+    margin-right:8px;
+    flex-shrink:0;
+  }
+  .q-opts{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+  .q-opt{
+    display:flex;align-items:center;gap:10px;
+    border:1.5px solid var(--line);
+    border-radius:7px;
+    padding:9px 12px;
+    cursor:pointer;
+    font-size:14px;
+  }
+  .q-opt:hover{border-color:var(--forest);background:#F5FAF7;}
+  .q-opt input{accent-color:var(--forest);flex-shrink:0;}
+  textarea{
+    width:100%;
+    min-height:80px;
+    border:1.5px solid var(--line);
+    border-radius:7px;
+    padding:10px 12px;
+    font-family:inherit;
+    font-size:14px;
+    margin-top:10px;
+    resize:vertical;
+  }
+  textarea:focus, .q-opt:focus-within{outline:none;border-color:var(--forest-dark);}
+
+  .submit-btn{
+    width:100%;
+    padding:14px;
+    background:var(--forest);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    margin-top:26px;
+  }
+  .submit-btn:hover{background:var(--forest-dark);}
+  .submit-btn:focus-visible{outline:2px solid var(--ink);outline-offset:3px;}
+
+  #thankyou{display:none;text-align:center;padding:34px 18px;}
+  #thankyou h2{font-family:'Source Serif 4',serif;color:var(--forest-dark);}
+
+  .no-scheme-banner{
+    margin-top:22px;
+    font-size:13px;
+    color:var(--muted);
+    text-align:center;
+    line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="kicker">Free &middot; Voluntary &middot; No purchase or payment required</div>
+      <h1>Community Voice — Local Feedback Survey</h1>
+    </div>
+    <div class="lang-picker">
+      <label for="langSelect">Select Language</label>
+      <select id="langSelect">
+        <option value="">English</option>
+      </select>
+      <div class="status-line" id="statusLine"></div>
+      <div class="keyboard-note" id="keyboardNote" style="display:none;"></div>
+    </div>
+  </header>
+
+  <div class="placeholder-note">
+    <b>Before you publish this:</b> replace every bracketed placeholder (organiser name, contact details, licence/registration info) with your real, verifiable information. Nothing here should promise money, loans, cryptocurrency, or guaranteed rewards — that's intentional.<br><br>
+    <b>About the languages:</b> this version works fully offline — no internet connection needed. It currently includes Hindi, Bengali, Marathi, Telugu, Tamil, Gujarati, Kannada, and Urdu, pre-translated and reviewed for accuracy. Other scheduled languages (Malayalam, Punjabi, Odia, Assamese, and others) aren't included yet — ask if you need one added, and please have a native speaker double-check any consent language before real-world use.
+  </div>
+
+  <section class="card">
+    <div class="card-hdr">
+      <span>About this survey</span>
+      <button class="speak-btn" id="speakDisclosureBtn" type="button">🔊 Read aloud</button>
+    </div>
+    <div class="card-body" id="disclosureBody"><!-- rendered by JS --></div>
+  </section>
+
+  <section class="card">
+    <div class="card-hdr">
+      <span>Before you begin</span>
+      <button class="speak-btn" id="speakConsentBtn" type="button">🔊 Read aloud</button>
+    </div>
+    <div class="card-body">
+      <div class="consent-box">
+        <input type="checkbox" id="consentCheck">
+        <label for="consentCheck">
+          <div class="en-text" id="consentEn">I have read the information above. I understand this is voluntary, free, and I can stop at any time.</div>
+          <div class="native-text" id="consentNative" style="display:none;"></div>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-hdr">
+      <span>Survey questions</span>
+      <button class="speak-btn" id="stopAudioBtn" type="button">⏹ Stop audio</button>
+    </div>
+    <div class="card-body" id="questionsBody"><!-- rendered by JS --></div>
+    <div class="card-body" style="padding-top:0;">
+      <button class="submit-btn" id="submitBtn">Submit my response</button>
+    </div>
+  </section>
+
+  <div class="no-scheme-banner">
+    This survey does not offer loans, tokens, cryptocurrency, or guaranteed cash rewards of any kind. If anyone asks you to pay money, provide banking details, or take a loan to participate in a "survey," that is not a legitimate opinion poll — please do not proceed, and report it.
+  </div>
+
+  <div id="thankyou">
+    <h2>Almost done</h2>
+    <p>Your responses have been prepared and your email app should now be opening with everything filled in, addressed to <strong>gkbharta44@gmail.com</strong>. Please check it over and press <strong>Send</strong> in your email app to actually submit it — this page cannot send it for you.</p>
+    <p>No payment, loan, or token was requested or offered, and none is owed.</p>
+    <p class="send-note">If your email app didn't open, your device may not have one set up for this browser. You can copy the response from the email draft manually, or ask the organiser for another way to submit.</p>
+  </div>
+
+</div>
+
+<script>
+// ---------- Languages available (statically translated, no network needed) ----------
+// BCP-47 code included for text-to-speech voice selection.
+const LANGUAGES = [
+  ["Hindi","हिन्दी","hi-IN"],
+  ["Bengali","বাংলা","bn-IN"],
+  ["Marathi","मराठी","mr-IN"],
+  ["Telugu","తెలుగు","te-IN"],
+  ["Tamil","தமிழ்","ta-IN"],
+  ["Gujarati","ગુજરાતી","gu-IN"],
+  ["Kannada","ಕನ್ನಡ","kn-IN"],
+  ["Urdu","اردو","ur-IN"]
+];
+
+const langSelect = document.getElementById('langSelect');
+LANGUAGES.forEach(([val,label])=>{
+  const opt = document.createElement('option');
+  opt.value = val; opt.textContent = label + " (" + val + ")";
+  langSelect.appendChild(opt);
+});
+
+// ---------- Master content (edit freely — this is the single source of truth) ----------
+const DISCLOSURE = [
+  { id:"d1", en:"Who is asking: [Organisation name], [registration or licence number if applicable]. Contact: [phone / email]." },
+  { id:"d2", en:"Why we're asking: to understand opinions and needs in your community so [organisation name] can improve local services or programmes." },
+  { id:"d3", en:"This is voluntary: you may skip any question, or stop at any point, without any consequence to you or your family." },
+  { id:"d4", en:"This costs nothing and offers nothing financial: there is no fee to take this survey, and no loan, credit, cryptocurrency, or token of any kind is offered for participating." },
+  { id:"d5", en:"How your answers are used: responses are combined with others and reported in summary form. [Explain here how long data is kept and who can see it.] You can ask us to delete your individual response at any time by contacting us." },
+  { id:"d6", en:"About any thank-you gift: [If you plan to offer a small thank-you, such as a printed coupon, describe its exact, modest value here. It should never be described as an investment, token, or loan, and must not depend on which answers someone gives.]" },
+  { id:"d7", en:"Your rights: you can ask what data we hold about you, ask us to correct or delete it, and withdraw your consent at any time. To do so, contact us using the details above." }
+];
+
+const QUESTIONS = [
+  { id:"q1", label:"How satisfied are you with the services currently available in your local community?",
+    opts:["Very satisfied","Satisfied","Neutral","Dissatisfied","Very dissatisfied"] },
+  { id:"q2", label:"Which of these matters most to you right now?",
+    opts:["Water and sanitation","Healthcare access","Education","Public transport","Employment opportunities","Safety and security"] },
+  { id:"q3", label:"Over the past year, has your access to these services improved, stayed the same, or gotten worse?",
+    opts:["Improved","Stayed the same","Gotten worse","Not sure"] },
+  { id:"q4", label:"What is the single biggest challenge your household faces right now?", text:true },
+  { id:"q5", label:"How do you prefer to receive information about local programmes or services?",
+    opts:["In person / community meeting","Phone call","SMS or WhatsApp","Local radio","Newspaper","Other"] },
+  { id:"q6", label:"Would you be willing to take part in a similar survey in the future?",
+    opts:["Yes","No","Maybe"] },
+  { id:"q7", label:"Any other feedback you'd like to share? (optional)", text:true }
+];
+
+// ---------- Static pre-translated content — no API calls, works fully offline ----------
+const TRANSLATIONS = {
+  "Hindi": {
+    d1:"कौन पूछ रहा है: [संगठन का नाम], [पंजीकरण या लाइसेंस संख्या, यदि लागू हो]। संपर्क: [फ़ोन / ईमेल]।",
+    d2:"हम क्यों पूछ रहे हैं: आपके समुदाय की राय और ज़रूरतों को समझने के लिए, ताकि [संगठन का नाम] स्थानीय सेवाओं या कार्यक्रमों में सुधार कर सके।",
+    d3:"यह स्वैच्छिक है: आप किसी भी प्रश्न को छोड़ सकते हैं, या किसी भी समय रुक सकते हैं, बिना आप या आपके परिवार पर कोई असर पड़े।",
+    d4:"इसमें कोई पैसा नहीं लगता और कुछ भी वित्तीय नहीं दिया जाता: इस सर्वेक्षण में भाग लेने की कोई फ़ीस नहीं है, और भाग लेने के लिए कोई ऋण, क्रेडिट, क्रिप्टोकरेंसी, या किसी भी प्रकार का टोकन नहीं दिया जाता।",
+    d5:"आपके उत्तरों का उपयोग कैसे होता है: उत्तरों को अन्य उत्तरों के साथ मिलाकर सारांश के रूप में रिपोर्ट किया जाता है। [यहाँ बताएं कि डेटा कितने समय तक रखा जाता है और इसे कौन देख सकता है।] आप हमसे संपर्क करके किसी भी समय अपना व्यक्तिगत उत्तर हटवाने के लिए कह सकते हैं।",
+    d6:"किसी धन्यवाद उपहार के बारे में: [यदि आप कोई छोटा धन्यवाद उपहार, जैसे प्रिंटेड कूपन, देने की योजना बना रहे हैं, तो यहाँ उसका सटीक, मामूली मूल्य बताएं। इसे कभी भी निवेश, टोकन, या ऋण के रूप में वर्णित न करें, और यह इस पर निर्भर नहीं करना चाहिए कि व्यक्ति क्या उत्तर देता है।]",
+    d7:"आपके अधिकार: आप पूछ सकते हैं कि हमारे पास आपका कौन सा डेटा है, इसे सही या हटाने के लिए कह सकते हैं, और किसी भी समय अपनी सहमति वापस ले सकते हैं। ऐसा करने के लिए ऊपर दिए गए विवरण का उपयोग करके हमसे संपर्क करें।",
+    consent:"मैंने ऊपर दी गई जानकारी पढ़ ली है। मैं समझता/समझती हूं कि यह स्वैच्छिक, नि:शुल्क है, और मैं किसी भी समय रुक सकता/सकती हूं।",
+    q1:"आप अपने स्थानीय समुदाय में उपलब्ध सेवाओं से कितने संतुष्ट हैं?",
+    "q1-opt-0":"बहुत संतुष्ट","q1-opt-1":"संतुष्ट","q1-opt-2":"तटस्थ","q1-opt-3":"असंतुष्ट","q1-opt-4":"बहुत असंतुष्ट",
+    q2:"इनमें से अभी आपके लिए सबसे ज़्यादा महत्वपूर्ण क्या है?",
+    "q2-opt-0":"पानी और स्वच्छता","q2-opt-1":"स्वास्थ्य सेवा तक पहुंच","q2-opt-2":"शिक्षा","q2-opt-3":"सार्वजनिक परिवहन","q2-opt-4":"रोज़गार के अवसर","q2-opt-5":"सुरक्षा",
+    q3:"पिछले एक साल में, इन सेवाओं तक आपकी पहुंच में सुधार हुआ है, वैसी ही रही है, या बिगड़ी है?",
+    "q3-opt-0":"सुधार हुआ","q3-opt-1":"वैसी ही रही","q3-opt-2":"बिगड़ी","q3-opt-3":"पता नहीं",
+    q4:"अभी आपके परिवार के सामने सबसे बड़ी चुनौती क्या है?",
+    q5:"आप स्थानीय कार्यक्रमों या सेवाओं के बारे में जानकारी कैसे प्राप्त करना पसंद करेंगे?",
+    "q5-opt-0":"व्यक्तिगत रूप से / सामुदायिक बैठक","q5-opt-1":"फ़ोन कॉल","q5-opt-2":"एसएमएस या व्हाट्सएप","q5-opt-3":"स्थानीय रेडियो","q5-opt-4":"समाचार पत्र","q5-opt-5":"अन्य",
+    q6:"क्या आप भविष्य में इस तरह के सर्वेक्षण में भाग लेने के इच्छुक होंगे?",
+    "q6-opt-0":"हां","q6-opt-1":"नहीं","q6-opt-2":"शायद",
+    q7:"क्या आप कोई अन्य प्रतिक्रिया साझा करना चाहेंगे? (वैकल्पिक)"
+  },
+  "Bengali": {
+    d1:"কে জিজ্ঞাসা করছে: [সংস্থার নাম], [নিবন্ধন বা লাইসেন্স নম্বর, প্রযোজ্য হলে]। যোগাযোগ: [ফোন / ইমেইল]।",
+    d2:"আমরা কেন জিজ্ঞাসা করছি: আপনার সম্প্রদায়ের মতামত ও চাহিদা বুঝতে, যাতে [সংস্থার নাম] স্থানীয় সেবা বা কর্মসূচি উন্নত করতে পারে।",
+    d3:"এটি স্বেচ্ছাসেবী: আপনি যেকোনো প্রশ্ন এড়িয়ে যেতে পারেন, বা যেকোনো সময় থামতে পারেন, আপনার বা আপনার পরিবারের ওপর কোনো প্রভাব ছাড়াই।",
+    d4:"এতে কোনো খরচ নেই এবং আর্থিক কিছুই দেওয়া হয় না: এই সমীক্ষায় অংশ নিতে কোনো ফি নেই, এবং অংশগ্রহণের জন্য কোনো ঋণ, ক্রেডিট, ক্রিপ্টোকারেন্সি, বা কোনো ধরনের টোকেন দেওয়া হয় না।",
+    d5:"আপনার উত্তর কীভাবে ব্যবহৃত হয়: উত্তরগুলো অন্যদের সাথে একত্রিত করে সারসংক্ষেপ আকারে জানানো হয়। [এখানে ব্যাখ্যা করুন ডেটা কতদিন রাখা হয় এবং কে তা দেখতে পারে।] আপনি যেকোনো সময় আমাদের সাথে যোগাযোগ করে আপনার নিজের উত্তর মুছে ফেলতে বলতে পারেন।",
+    d6:"কোনো ধন্যবাদসূচক উপহার সম্পর্কে: [আপনি যদি ছোট কোনো ধন্যবাদসূচক উপহার, যেমন মুদ্রিত কুপন, দেওয়ার পরিকল্পনা করেন, তাহলে এখানে তার সঠিক, সামান্য মূল্য উল্লেখ করুন। এটিকে কখনো বিনিয়োগ, টোকেন, বা ঋণ হিসেবে বর্ণনা করা উচিত নয়, এবং এটি কেউ কী উত্তর দিচ্ছে তার ওপর নির্ভরশীল হওয়া উচিত নয়।]",
+    d7:"আপনার অধিকার: আপনি জিজ্ঞাসা করতে পারেন আমাদের কাছে আপনার কী তথ্য আছে, তা সংশোধন বা মুছে ফেলতে বলতে পারেন, এবং যেকোনো সময় আপনার সম্মতি প্রত্যাহার করতে পারেন। এর জন্য উপরের বিবরণ ব্যবহার করে আমাদের সাথে যোগাযোগ করুন।",
+    consent:"আমি উপরের তথ্য পড়েছি। আমি বুঝেছি এটি স্বেচ্ছাসেবী, বিনামূল্যে, এবং আমি যেকোনো সময় থামতে পারি।",
+    q1:"আপনার স্থানীয় সম্প্রদায়ে বর্তমানে উপলব্ধ সেবাগুলোতে আপনি কতটা সন্তুষ্ট?",
+    "q1-opt-0":"খুব সন্তুষ্ট","q1-opt-1":"সন্তুষ্ট","q1-opt-2":"নিরপেক্ষ","q1-opt-3":"অসন্তুষ্ট","q1-opt-4":"খুব অসন্তুষ্ট",
+    q2:"এর মধ্যে এখন আপনার কাছে সবচেয়ে গুরুত্বপূর্ণ কোনটি?",
+    "q2-opt-0":"পানি ও স্যানিটেশন","q2-opt-1":"স্বাস্থ্যসেবা প্রাপ্তি","q2-opt-2":"শিক্ষা","q2-opt-3":"গণপরিবহন","q2-opt-4":"কর্মসংস্থানের সুযোগ","q2-opt-5":"নিরাপত্তা",
+    q3:"গত এক বছরে, এই সেবাগুলোতে আপনার প্রবেশাধিকার উন্নত হয়েছে, একই রয়ে গেছে, নাকি খারাপ হয়েছে?",
+    "q3-opt-0":"উন্নত হয়েছে","q3-opt-1":"একই রয়ে গেছে","q3-opt-2":"খারাপ হয়েছে","q3-opt-3":"নিশ্চিত নই",
+    q4:"এই মুহূর্তে আপনার পরিবারের সবচেয়ে বড় চ্যালেঞ্জ কী?",
+    q5:"স্থানীয় কর্মসূচি বা সেবা সম্পর্কে তথ্য পেতে আপনি কীভাবে পছন্দ করেন?",
+    "q5-opt-0":"সরাসরি / সম্প্রদায় সভায়","q5-opt-1":"ফোন কল","q5-opt-2":"এসএমএস বা হোয়াটসঅ্যাপ","q5-opt-3":"স্থানীয় রেডিও","q5-opt-4":"সংবাদপত্র","q5-opt-5":"অন্যান্য",
+    q6:"ভবিষ্যতে এই ধরনের সমীক্ষায় অংশ নিতে আপনি আগ্রহী হবেন কি?",
+    "q6-opt-0":"হ্যাঁ","q6-opt-1":"না","q6-opt-2":"হয়তো",
+    q7:"আপনি কি অন্য কোনো মতামত জানাতে চান? (ঐচ্ছিক)"
+  },
+  "Marathi": {
+    d1:"कोण विचारत आहे: [संस्थेचे नाव], [नोंदणी किंवा परवाना क्रमांक, लागू असल्यास]. संपर्क: [फोन / ईमेल].",
+    d2:"आम्ही का विचारत आहोत: तुमच्या समुदायाची मते आणि गरजा समजून घेण्यासाठी, जेणेकरून [संस्थेचे नाव] स्थानिक सेवा किंवा कार्यक्रम सुधारू शकेल.",
+    d3:"हे ऐच्छिक आहे: तुम्ही कोणताही प्रश्न वगळू शकता, किंवा कधीही थांबू शकता, तुमच्यावर किंवा तुमच्या कुटुंबावर कोणताही परिणाम न होता.",
+    d4:"यासाठी काहीही खर्च नाही आणि कोणतीही आर्थिक गोष्ट दिली जात नाही: या सर्वेक्षणात सहभागी होण्यासाठी कोणतेही शुल्क नाही, आणि सहभागासाठी कोणतेही कर्ज, क्रेडिट, क्रिप्टोकरन्सी, किंवा कोणत्याही प्रकारचे टोकन दिले जात नाही.",
+    d5:"तुमची उत्तरे कशी वापरली जातात: उत्तरे इतरांसोबत एकत्र करून सारांश स्वरूपात नोंदवली जातात. [इथे स्पष्ट करा डेटा किती काळ ठेवला जातो आणि तो कोण पाहू शकतो.] तुम्ही आमच्याशी संपर्क साधून कधीही तुमचे वैयक्तिक उत्तर हटवण्यास सांगू शकता.",
+    d6:"कोणत्याही धन्यवाद भेटवस्तूबद्दल: [जर तुम्ही एखादी छोटी धन्यवाद भेट, जसे की छापील कूपन, देण्याची योजना आखत असाल, तर इथे तिचे नेमके, माफक मूल्य नमूद करा. हिला कधीही गुंतवणूक, टोकन, किंवा कर्ज म्हणून वर्णन करू नये, आणि ती कोणी कोणती उत्तरे दिली यावर अवलंबून नसावी.]",
+    d7:"तुमचे हक्क: तुम्ही आमच्याकडे तुमचा कोणता डेटा आहे हे विचारू शकता, तो दुरुस्त किंवा हटवण्यास सांगू शकता, आणि कधीही तुमची संमती मागे घेऊ शकता. यासाठी वरील तपशील वापरून आमच्याशी संपर्क साधा.",
+    consent:"मी वरील माहिती वाचली आहे. मला समजले आहे की हे ऐच्छिक, मोफत आहे, आणि मी कधीही थांबू शकतो/शकते.",
+    q1:"तुमच्या स्थानिक समुदायात सध्या उपलब्ध सेवांबद्दल तुम्ही किती समाधानी आहात?",
+    "q1-opt-0":"खूप समाधानी","q1-opt-1":"समाधानी","q1-opt-2":"तटस्थ","q1-opt-3":"असमाधानी","q1-opt-4":"खूप असमाधानी",
+    q2:"यापैकी सध्या तुमच्यासाठी सर्वात महत्त्वाचे काय आहे?",
+    "q2-opt-0":"पाणी आणि स्वच्छता","q2-opt-1":"आरोग्य सेवा उपलब्धता","q2-opt-2":"शिक्षण","q2-opt-3":"सार्वजनिक वाहतूक","q2-opt-4":"रोजगाराच्या संधी","q2-opt-5":"सुरक्षितता",
+    q3:"गेल्या वर्षभरात, या सेवांपर्यंतचा तुमचा प्रवेश सुधारला आहे, तसाच राहिला आहे, की बिघडला आहे?",
+    "q3-opt-0":"सुधारला","q3-opt-1":"तसाच राहिला","q3-opt-2":"बिघडला","q3-opt-3":"खात्री नाही",
+    q4:"सध्या तुमच्या कुटुंबासमोर सर्वात मोठे आव्हान काय आहे?",
+    q5:"स्थानिक कार्यक्रम किंवा सेवांबद्दल माहिती मिळवण्यासाठी तुम्ही कोणता मार्ग पसंत कराल?",
+    "q5-opt-0":"प्रत्यक्ष भेटून / समुदाय सभेत","q5-opt-1":"फोन कॉल","q5-opt-2":"एसएमएस किंवा व्हॉट्सअॅप","q5-opt-3":"स्थानिक रेडिओ","q5-opt-4":"वृत्तपत्र","q5-opt-5":"इतर",
+    q6:"भविष्यात अशा प्रकारच्या सर्वेक्षणात सहभागी होण्यास तुम्ही इच्छुक असाल का?",
+    "q6-opt-0":"होय","q6-opt-1":"नाही","q6-opt-2":"कदाचित",
+    q7:"तुम्हाला आणखी काही अभिप्राय द्यायचा आहे का? (ऐच्छिक)"
+  },
+  "Telugu": {
+    d1:"ఎవరు అడుగుతున్నారు: [సంస్థ పేరు], [నమోదు లేదా లైసెన్స్ నంబర్, వర్తిస్తే]. సంప్రదించండి: [ఫోన్ / ఇమెయిల్].",
+    d2:"మేము ఎందుకు అడుగుతున్నాము: మీ సమాజం అభిప్రాయాలను మరియు అవసరాలను అర్థం చేసుకోవడానికి, తద్వారా [సంస్థ పేరు] స్థానిక సేవలను లేదా కార్యక్రమాలను మెరుగుపరచగలదు.",
+    d3:"ఇది స్వచ్ఛందం: మీరు ఏ ప్రశ్నను అయినా దాటవేయవచ్చు, లేదా ఎప్పుడైనా ఆపవచ్చు, మీపై లేదా మీ కుటుంబంపై ఎలాంటి ప్రభావం లేకుండా.",
+    d4:"దీనికి ఖర్చు ఏమీ లేదు మరియు ఆర్థికపరమైనది ఏదీ ఇవ్వబడదు: ఈ సర్వేలో పాల్గొనడానికి ఎలాంటి రుసుము లేదు, మరియు పాల్గొనడానికి ఎలాంటి రుణం, క్రెడిట్, క్రిప్టోకరెన్సీ, లేదా ఏ రకమైన టోకెన్ ఇవ్వబడదు.",
+    d5:"మీ సమాధానాలు ఎలా ఉపయోగించబడతాయి: సమాధానాలు ఇతరులతో కలిపి సారాంశ రూపంలో నివేదించబడతాయి. [డేటా ఎంతకాలం ఉంచబడుతుందో మరియు దానిని ఎవరు చూడగలరో ఇక్కడ వివరించండి.] మీరు మమ్మల్ని సంప్రదించడం ద్వారా ఎప్పుడైనా మీ వ్యక్తిగత సమాధానాన్ని తొలగించమని అడగవచ్చు.",
+    d6:"ఏదైనా కృతజ్ఞతా బహుమతి గురించి: [మీరు ముద్రిత కూపన్ వంటి చిన్న కృతజ్ఞతా బహుమతిని ఇవ్వాలని ప్లాన్ చేస్తే, దాని ఖచ్చితమైన, స్వల్ప విలువను ఇక్కడ వివరించండి. దీన్ని ఎప్పుడూ పెట్టుబడి, టోకెన్, లేదా రుణంగా వర్ణించకూడదు, మరియు ఎవరైనా ఏ సమాధానాలు ఇచ్చారనే దానిపై ఆధారపడి ఉండకూడదు.]",
+    d7:"మీ హక్కులు: మా వద్ద మీ గురించి ఏ డేటా ఉందో మీరు అడగవచ్చు, దానిని సరిచేయమని లేదా తొలగించమని అడగవచ్చు, మరియు ఎప్పుడైనా మీ సమ్మతిని ఉపసంహరించుకోవచ్చు. దీని కోసం పైన ఇచ్చిన వివరాలను ఉపయోగించి మమ్మల్ని సంప్రదించండి.",
+    consent:"నేను పైన ఇచ్చిన సమాచారాన్ని చదివాను. ఇది స్వచ్ఛందమని, ఉచితమని, మరియు నేను ఎప్పుడైనా ఆపగలనని నాకు అర్థమైంది.",
+    q1:"మీ స్థానిక సమాజంలో ప్రస్తుతం అందుబాటులో ఉన్న సేవల పట్ల మీరు ఎంత సంతృప్తిగా ఉన్నారు?",
+    "q1-opt-0":"చాలా సంతృప్తి","q1-opt-1":"సంతృప్తి","q1-opt-2":"తటస్థం","q1-opt-3":"అసంతృప్తి","q1-opt-4":"చాలా అసంతృప్తి",
+    q2:"వీటిలో ప్రస్తుతం మీకు అత్యంత ముఖ్యమైనది ఏది?",
+    "q2-opt-0":"నీరు మరియు పారిశుధ్యం","q2-opt-1":"ఆరోగ్య సేవల లభ్యత","q2-opt-2":"విద్య","q2-opt-3":"ప్రజా రవాణా","q2-opt-4":"ఉపాధి అవకాశాలు","q2-opt-5":"భద్రత",
+    q3:"గత సంవత్సరంలో, ఈ సేవలకు మీ ప్రాప్యత మెరుగుపడిందా, అలాగే ఉందా, లేదా దిగజారిందా?",
+    "q3-opt-0":"మెరుగుపడింది","q3-opt-1":"అలాగే ఉంది","q3-opt-2":"దిగజారింది","q3-opt-3":"తెలియదు",
+    q4:"ప్రస్తుతం మీ కుటుంబం ఎదుర్కొంటున్న అతిపెద్ద సవాలు ఏమిటి?",
+    q5:"స్థానిక కార్యక్రమాలు లేదా సేవల గురించి సమాచారం పొందడానికి మీరు దేనికి ప్రాధాన్యత ఇస్తారు?",
+    "q5-opt-0":"ప్రత్యక్షంగా / సామాజిక సమావేశంలో","q5-opt-1":"ఫోన్ కాల్","q5-opt-2":"SMS లేదా వాట్సాప్","q5-opt-3":"స్థానిక రేడియో","q5-opt-4":"వార్తాపత్రిక","q5-opt-5":"ఇతరం",
+    q6:"భవిష్యత్తులో ఇలాంటి సర్వేలో పాల్గొనడానికి మీరు సిద్ధంగా ఉన్నారా?",
+    "q6-opt-0":"అవును","q6-opt-1":"కాదు","q6-opt-2":"బహుశా",
+    q7:"మీరు మరేదైనా అభిప్రాయాన్ని పంచుకోవాలనుకుంటున్నారా? (ఐచ్ఛికం)"
+  },
+  "Tamil": {
+    d1:"யார் கேட்கிறார்கள்: [அமைப்பின் பெயர்], [பதிவு அல்லது உரிமம் எண், பொருந்தினால்]. தொடர்பு: [தொலைபேசி / மின்னஞ்சல்].",
+    d2:"நாங்கள் ஏன் கேட்கிறோம்: உங்கள் சமூகத்தின் கருத்துகளையும் தேவைகளையும் புரிந்துகொள்ள, இதனால் [அமைப்பின் பெயர்] உள்ளூர் சேவைகள் அல்லது திட்டங்களை மேம்படுத்த முடியும்.",
+    d3:"இது தன்னார்வமானது: நீங்கள் எந்த கேள்வியையும் தவிர்க்கலாம், அல்லது எந்த நேரத்திலும் நிறுத்தலாம், உங்களுக்கோ உங்கள் குடும்பத்திற்கோ எந்த விளைவும் இல்லாமல்.",
+    d4:"இதற்கு எந்த செலவும் இல்லை, நிதி ரீதியான எதுவும் வழங்கப்படாது: இந்த கணக்கெடுப்பில் பங்கேற்க எந்த கட்டணமும் இல்லை, மேலும் பங்கேற்பதற்கு எந்த கடன், கடன் வசதி, கிரிப்டோகரன்சி, அல்லது எந்த வகையான டோக்கனும் வழங்கப்படாது.",
+    d5:"உங்கள் பதில்கள் எவ்வாறு பயன்படுத்தப்படுகின்றன: பதில்கள் மற்றவற்றுடன் இணைக்கப்பட்டு சுருக்க வடிவில் தெரிவிக்கப்படும். [தரவு எவ்வளவு காலம் வைக்கப்படுகிறது, யார் அதைப் பார்க்க முடியும் என்பதை இங்கே விளக்கவும்.] எங்களைத் தொடர்புகொண்டு உங்கள் தனிப்பட்ட பதிலை எந்த நேரத்திலும் நீக்கச் சொல்லலாம்.",
+    d6:"நன்றி பரிசு பற்றி: [அச்சிடப்பட்ட கூப்பன் போன்ற ஒரு சிறிய நன்றி பரிசை வழங்க திட்டமிட்டால், அதன் சரியான, சிறிய மதிப்பை இங்கே விவரிக்கவும். இது ஒருபோதும் முதலீடு, டோக்கன், அல்லது கடன் என விவரிக்கப்படக்கூடாது, மேலும் ஒருவர் என்ன பதில் அளிக்கிறார் என்பதைப் பொறுத்து இருக்கக்கூடாது.]",
+    d7:"உங்கள் உரிமைகள்: எங்களிடம் உங்களைப் பற்றி என்ன தரவு உள்ளது என்று நீங்கள் கேட்கலாம், அதைத் திருத்த அல்லது நீக்கச் சொல்லலாம், மற்றும் எந்த நேரத்திலும் உங்கள் ஒப்புதலை திரும்பப் பெறலாம். இதற்கு மேலே உள்ள விவரங்களைப் பயன்படுத்தி எங்களைத் தொடர்பு கொள்ளவும்.",
+    consent:"மேலே உள்ள தகவலை நான் படித்தேன். இது தன்னார்வமானது, இலவசமானது, நான் எந்த நேரத்திலும் நிறுத்தலாம் என்பதை புரிந்துகொண்டேன்.",
+    q1:"உங்கள் உள்ளூர் சமூகத்தில் தற்போது கிடைக்கும் சேவைகளில் நீங்கள் எவ்வளவு திருப்தி அடைந்துள்ளீர்கள்?",
+    "q1-opt-0":"மிகவும் திருப்தி","q1-opt-1":"திருப்தி","q1-opt-2":"நடுநிலை","q1-opt-3":"அதிருப்தி","q1-opt-4":"மிகவும் அதிருப்தி",
+    q2:"இவற்றில் தற்போது உங்களுக்கு மிக முக்கியமானது எது?",
+    "q2-opt-0":"நீர் மற்றும் சுகாதாரம்","q2-opt-1":"சுகாதார சேவை அணுகல்","q2-opt-2":"கல்வி","q2-opt-3":"பொது போக்குவரத்து","q2-opt-4":"வேலை வாய்ப்புகள்","q2-opt-5":"பாதுகாப்பு",
+    q3:"கடந்த ஆண்டில், இந்த சேவைகளுக்கான உங்கள் அணுகல் மேம்பட்டதா, அப்படியே இருந்ததா, அல்லது மோசமடைந்ததா?",
+    "q3-opt-0":"மேம்பட்டது","q3-opt-1":"அப்படியே இருந்தது","q3-opt-2":"மோசமடைந்தது","q3-opt-3":"உறுதியாக தெரியவில்லை",
+    q4:"தற்போது உங்கள் குடும்பம் எதிர்கொள்ளும் மிகப்பெரிய சவால் என்ன?",
+    q5:"உள்ளூர் திட்டங்கள் அல்லது சேவைகள் பற்றிய தகவலை பெற நீங்கள் எதை விரும்புகிறீர்கள்?",
+    "q5-opt-0":"நேரடியாக / சமூகக் கூட்டத்தில்","q5-opt-1":"தொலைபேசி அழைப்பு","q5-opt-2":"SMS அல்லது வாட்ஸ்அப்","q5-opt-3":"உள்ளூர் வானொலி","q5-opt-4":"செய்தித்தாள்","q5-opt-5":"மற்றவை",
+    q6:"எதிர்காலத்தில் இதுபோன்ற கணக்கெடுப்பில் பங்கேற்க நீங்கள் விரும்புவீர்களா?",
+    "q6-opt-0":"ஆம்","q6-opt-1":"இல்லை","q6-opt-2":"இருக்கலாம்",
+    q7:"நீங்கள் பகிர விரும்பும் வேறு கருத்து ஏதும் உள்ளதா? (விருப்பத்தேர்வு)"
+  },
+  "Gujarati": {
+    d1:"કોણ પૂછે છે: [સંસ્થાનું નામ], [નોંધણી અથવા લાયસન્સ નંબર, જો લાગુ પડે]. સંપર્ક: [ફોન / ઇમેઇલ].",
+    d2:"અમે શા માટે પૂછીએ છીએ: તમારા સમુદાયના મંતવ્યો અને જરૂરિયાતોને સમજવા માટે, જેથી [સંસ્થાનું નામ] સ્થાનિક સેવાઓ અથવા કાર્યક્રમોમાં સુધારો કરી શકે.",
+    d3:"આ સ્વૈચ્છિક છે: તમે કોઈપણ પ્રશ્ન છોડી શકો છો, અથવા કોઈપણ સમયે અટકી શકો છો, તમારા અથવા તમારા પરિવાર પર કોઈ અસર વગર.",
+    d4:"આમાં કોઈ ખર્ચ નથી અને કંઈ પણ નાણાકીય આપવામાં આવતું નથી: આ સર્વેમાં ભાગ લેવા માટે કોઈ ફી નથી, અને ભાગ લેવા માટે કોઈ લોન, ક્રેડિટ, ક્રિપ્ટોકરન્સી, અથવા કોઈપણ પ્રકારનું ટોકન આપવામાં આવતું નથી.",
+    d5:"તમારા જવાબોનો ઉપયોગ કેવી રીતે થાય છે: જવાબોને અન્ય જવાબો સાથે જોડીને સારાંશ સ્વરૂપે જણાવવામાં આવે છે. [અહીં સમજાવો કે ડેટા કેટલા સમય માટે રાખવામાં આવે છે અને તેને કોણ જોઈ શકે છે.] તમે અમારો સંપર્ક કરીને કોઈપણ સમયે તમારો વ્યક્તિગત જવાબ કાઢી નાખવાનું કહી શકો છો.",
+    d6:"કોઈ આભાર ભેટ વિશે: [જો તમે નાની આભાર ભેટ, જેમ કે છાપેલ કૂપન, આપવાનું આયોજન કરો છો, તો અહીં તેની ચોક્કસ, નજીવી કિંમત જણાવો. તેને ક્યારેય રોકાણ, ટોકન, અથવા લોન તરીકે વર્ણવવું જોઈએ નહીં, અને તે વ્યક્તિ કયા જવાબો આપે છે તેના પર નિર્ભર ન હોવું જોઈએ.]",
+    d7:"તમારા અધિકારો: તમે પૂછી શકો છો કે અમારી પાસે તમારો કયો ડેટા છે, તેને સુધારવા અથવા કાઢી નાખવાનું કહી શકો છો, અને કોઈપણ સમયે તમારી સંમતિ પાછી ખેંચી શકો છો. આ માટે ઉપર આપેલી વિગતોનો ઉપયોગ કરીને અમારો સંપર્ક કરો.",
+    consent:"મેં ઉપરની માહિતી વાંચી છે. હું સમજું છું કે આ સ્વૈચ્છિક, મફત છે, અને હું કોઈપણ સમયે અટકી શકું છું.",
+    q1:"તમારા સ્થાનિક સમુદાયમાં હાલમાં ઉપલબ્ધ સેવાઓથી તમે કેટલા સંતુષ્ટ છો?",
+    "q1-opt-0":"ખૂબ સંતુષ્ટ","q1-opt-1":"સંતુષ્ટ","q1-opt-2":"તટસ્થ","q1-opt-3":"અસંતુષ્ટ","q1-opt-4":"ખૂબ અસંતુષ્ટ",
+    q2:"આમાંથી અત્યારે તમારા માટે સૌથી મહત્વનું શું છે?",
+    "q2-opt-0":"પાણી અને સ્વચ્છતા","q2-opt-1":"આરોગ્ય સેવાની પહોંચ","q2-opt-2":"શિક્ષણ","q2-opt-3":"જાહેર પરિવહન","q2-opt-4":"રોજગારીની તકો","q2-opt-5":"સલામતી",
+    q3:"છેલ્લા વર્ષમાં, આ સેવાઓ સુધીની તમારી પહોંચ સુધરી છે, એવી જ રહી છે, કે બગડી છે?",
+    "q3-opt-0":"સુધરી","q3-opt-1":"એવી જ રહી","q3-opt-2":"બગડી","q3-opt-3":"ખાતરી નથી",
+    q4:"અત્યારે તમારા પરિવાર સામે સૌથી મોટો પડકાર શું છે?",
+    q5:"સ્થાનિક કાર્યક્રમો અથવા સેવાઓ વિશે માહિતી મેળવવા તમે શું પસંદ કરશો?",
+    "q5-opt-0":"રૂબરૂ / સામુદાયિક સભામાં","q5-opt-1":"ફોન કૉલ","q5-opt-2":"SMS અથવા વોટ્સએપ","q5-opt-3":"સ્થાનિક રેડિયો","q5-opt-4":"અખબાર","q5-opt-5":"અન્ય",
+    q6:"ભવિષ્યમાં આવા સર્વેમાં ભાગ લેવા તમે તૈયાર હશો?",
+    "q6-opt-0":"હા","q6-opt-1":"ના","q6-opt-2":"કદાચ",
+    q7:"શું તમે બીજું કોઈ પ્રતિભાવ શેર કરવા માંગો છો? (વૈકલ્પિક)"
+  },
+  "Kannada": {
+    d1:"ಯಾರು ಕೇಳುತ್ತಿದ್ದಾರೆ: [ಸಂಸ್ಥೆಯ ಹೆಸರು], [ನೋಂದಣಿ ಅಥವಾ ಪರವಾನಗಿ ಸಂಖ್ಯೆ, ಅನ್ವಯಿಸಿದರೆ]. ಸಂಪರ್ಕ: [ಫೋನ್ / ಇಮೇಲ್].",
+    d2:"ನಾವು ಏಕೆ ಕೇಳುತ್ತಿದ್ದೇವೆ: ನಿಮ್ಮ ಸಮುದಾಯದ ಅಭಿಪ್ರಾಯಗಳು ಮತ್ತು ಅಗತ್ಯಗಳನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು, ಇದರಿಂದ [ಸಂಸ್ಥೆಯ ಹೆಸರು] ಸ್ಥಳೀಯ ಸೇವೆಗಳು ಅಥವಾ ಕಾರ್ಯಕ್ರಮಗಳನ್ನು ಸುಧಾರಿಸಬಹುದು.",
+    d3:"ಇದು ಸ್ವಯಂಪ್ರೇರಿತ: ನೀವು ಯಾವುದೇ ಪ್ರಶ್ನೆಯನ್ನು ಬಿಟ್ಟುಬಿಡಬಹುದು, ಅಥವಾ ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ನಿಲ್ಲಿಸಬಹುದು, ನಿಮಗೆ ಅಥವಾ ನಿಮ್ಮ ಕುಟುಂಬಕ್ಕೆ ಯಾವುದೇ ಪರಿಣಾಮವಿಲ್ಲದೆ.",
+    d4:"ಇದಕ್ಕೆ ಯಾವುದೇ ವೆಚ್ಚವಿಲ್ಲ ಮತ್ತು ಯಾವುದೇ ಆರ್ಥಿಕ ವಿಷಯ ನೀಡಲಾಗುವುದಿಲ್ಲ: ಈ ಸಮೀಕ್ಷೆಯಲ್ಲಿ ಭಾಗವಹಿಸಲು ಯಾವುದೇ ಶುಲ್ಕವಿಲ್ಲ, ಮತ್ತು ಭಾಗವಹಿಸಲು ಯಾವುದೇ ಸಾಲ, ಕ್ರೆಡಿಟ್, ಕ್ರಿಪ್ಟೋಕರೆನ್ಸಿ, ಅಥವಾ ಯಾವುದೇ ರೀತಿಯ ಟೋಕನ್ ನೀಡಲಾಗುವುದಿಲ್ಲ.",
+    d5:"ನಿಮ್ಮ ಉತ್ತರಗಳನ್ನು ಹೇಗೆ ಬಳಸಲಾಗುತ್ತದೆ: ಉತ್ತರಗಳನ್ನು ಇತರರೊಂದಿಗೆ ಸಂಯೋಜಿಸಿ ಸಾರಾಂಶ ರೂಪದಲ್ಲಿ ವರದಿ ಮಾಡಲಾಗುತ್ತದೆ. [ಡೇಟಾವನ್ನು ಎಷ್ಟು ಕಾಲ ಇಡಲಾಗುತ್ತದೆ ಮತ್ತು ಅದನ್ನು ಯಾರು ನೋಡಬಹುದು ಎಂಬುದನ್ನು ಇಲ್ಲಿ ವಿವರಿಸಿ.] ನೀವು ನಮ್ಮನ್ನು ಸಂಪರ್ಕಿಸುವ ಮೂಲಕ ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಉತ್ತರವನ್ನು ಅಳಿಸಲು ಕೇಳಬಹುದು.",
+    d6:"ಯಾವುದೇ ಧನ್ಯವಾದ ಉಡುಗೊರೆಯ ಬಗ್ಗೆ: [ನೀವು ಮುದ್ರಿತ ಕೂಪನ್‌ನಂತಹ ಸಣ್ಣ ಧನ್ಯವಾದ ಉಡುಗೊರೆಯನ್ನು ನೀಡಲು ಯೋಜಿಸಿದರೆ, ಅದರ ನಿಖರವಾದ, ಸಾಧಾರಣ ಮೌಲ್ಯವನ್ನು ಇಲ್ಲಿ ವಿವರಿಸಿ. ಇದನ್ನು ಎಂದಿಗೂ ಹೂಡಿಕೆ, ಟೋಕನ್, ಅಥವಾ ಸಾಲ ಎಂದು ವಿವರಿಸಬಾರದು, ಮತ್ತು ಇದು ಯಾರಾದರೂ ಯಾವ ಸಮಾಧಾನಗಳನ್ನು ನೀಡುತ್ತಾರೆ ಎಂಬುದರ ಮೇಲೆ ಅವಲಂಬಿತವಾಗಿರಬಾರದು.]",
+    d7:"ನಿಮ್ಮ ಹಕ್ಕುಗಳು: ನಮ್ಮ ಬಳಿ ನಿಮ್ಮ ಬಗ್ಗೆ ಯಾವ ಡೇಟಾ ಇದೆ ಎಂದು ನೀವು ಕೇಳಬಹುದು, ಅದನ್ನು ಸರಿಪಡಿಸಲು ಅಥವಾ ಅಳಿಸಲು ಕೇಳಬಹುದು, ಮತ್ತು ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ ಒಪ್ಪಿಗೆಯನ್ನು ಹಿಂಪಡೆಯಬಹುದು. ಇದಕ್ಕಾಗಿ ಮೇಲಿನ ವಿವರಗಳನ್ನು ಬಳಸಿ ನಮ್ಮನ್ನು ಸಂಪರ್ಕಿಸಿ.",
+    consent:"ನಾನು ಮೇಲಿನ ಮಾಹಿತಿಯನ್ನು ಓದಿದ್ದೇನೆ. ಇದು ಸ್ವಯಂಪ್ರೇರಿತ, ಉಚಿತ, ಮತ್ತು ನಾನು ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ನಿಲ್ಲಿಸಬಹುದು ಎಂದು ನನಗೆ ಅರ್ಥವಾಗಿದೆ.",
+    q1:"ನಿಮ್ಮ ಸ್ಥಳೀಯ ಸಮುದಾಯದಲ್ಲಿ ಪ್ರಸ್ತುತ ಲಭ್ಯವಿರುವ ಸೇವೆಗಳ ಬಗ್ಗೆ ನೀವು ಎಷ್ಟು ತೃಪ್ತರಾಗಿದ್ದೀರಿ?",
+    "q1-opt-0":"ಬಹಳ ತೃಪ್ತಿ","q1-opt-1":"ತೃಪ್ತಿ","q1-opt-2":"ತಟಸ್ಥ","q1-opt-3":"ಅತೃಪ್ತಿ","q1-opt-4":"ಬಹಳ ಅತೃಪ್ತಿ",
+    q2:"ಇವುಗಳಲ್ಲಿ ಈಗ ನಿಮಗೆ ಅತ್ಯಂತ ಮುಖ್ಯವಾದುದು ಯಾವುದು?",
+    "q2-opt-0":"ನೀರು ಮತ್ತು ನೈರ್ಮಲ್ಯ","q2-opt-1":"ಆರೋಗ್ಯ ಸೇವೆಯ ಪ್ರವೇಶ","q2-opt-2":"ಶಿಕ್ಷಣ","q2-opt-3":"ಸಾರ್ವಜನಿಕ ಸಾರಿಗೆ","q2-opt-4":"ಉದ್ಯೋಗಾವಕಾಶಗಳು","q2-opt-5":"ಸುರಕ್ಷತೆ",
+    q3:"ಕಳೆದ ವರ್ಷದಲ್ಲಿ, ಈ ಸೇವೆಗಳಿಗೆ ನಿಮ್ಮ ಪ್ರವೇಶ ಸುಧಾರಿಸಿದೆಯೇ, ಹಾಗೆಯೇ ಉಳಿದಿದೆಯೇ, ಅಥವಾ ಹದಗೆಟ್ಟಿದೆಯೇ?",
+    "q3-opt-0":"ಸುಧಾರಿಸಿದೆ","q3-opt-1":"ಹಾಗೆಯೇ ಉಳಿದಿದೆ","q3-opt-2":"ಹದಗೆಟ್ಟಿದೆ","q3-opt-3":"ಖಚಿತವಿಲ್ಲ",
+    q4:"ಈಗ ನಿಮ್ಮ ಕುಟುಂಬ ಎದುರಿಸುತ್ತಿರುವ ಅತಿ ದೊಡ್ಡ ಸವಾಲು ಏನು?",
+    q5:"ಸ್ಥಳೀಯ ಕಾರ್ಯಕ್ರಮಗಳು ಅಥವಾ ಸೇವೆಗಳ ಬಗ್ಗೆ ಮಾಹಿತಿ ಪಡೆಯಲು ನೀವು ಯಾವುದನ್ನು ಬಯಸುತ್ತೀರಿ?",
+    "q5-opt-0":"ವೈಯಕ್ತಿಕವಾಗಿ / ಸಮುದಾಯ ಸಭೆಯಲ್ಲಿ","q5-opt-1":"ಫೋನ್ ಕರೆ","q5-opt-2":"SMS ಅಥವಾ ವಾಟ್ಸ್‌ಆ್ಯಪ್","q5-opt-3":"ಸ್ಥಳೀಯ ರೇಡಿಯೋ","q5-opt-4":"ದಿನಪತ್ರಿಕೆ","q5-opt-5":"ಇತರೆ",
+    q6:"ಭವಿಷ್ಯದಲ್ಲಿ ಇಂತಹ ಸಮೀಕ್ಷೆಯಲ್ಲಿ ಭಾಗವಹಿಸಲು ನೀವು ಸಿದ್ಧರಿದ್ದೀರಾ?",
+    "q6-opt-0":"ಹೌದು","q6-opt-1":"ಇಲ್ಲ","q6-opt-2":"ಬಹುಶಃ",
+    q7:"ನೀವು ಹಂಚಿಕೊಳ್ಳಲು ಬಯಸುವ ಬೇರೆ ಯಾವುದೇ ಪ್ರತಿಕ್ರಿಯೆ ಇದೆಯೇ? (ಐಚ್ಛಿಕ)"
+  },
+  "Urdu": {
+    d1:"کون پوچھ رہا ہے: [ادارے کا نام]، [رجسٹریشن یا لائسنس نمبر، اگر لاگو ہو]۔ رابطہ: [فون / ای میل]۔",
+    d2:"ہم کیوں پوچھ رہے ہیں: آپ کی برادری کی آراء اور ضروریات کو سمجھنے کے لیے، تاکہ [ادارے کا نام] مقامی خدمات یا پروگراموں کو بہتر بنا سکے۔",
+    d3:"یہ رضاکارانہ ہے: آپ کسی بھی سوال کو چھوڑ سکتے ہیں، یا کسی بھی وقت رک سکتے ہیں، آپ یا آپ کے خاندان پر کوئی اثر پڑے بغیر۔",
+    d4:"اس میں کوئی خرچ نہیں اور کوئی مالی چیز نہیں دی جاتی: اس سروے میں حصہ لینے کے لیے کوئی فیس نہیں ہے، اور شرکت کے لیے کوئی قرض، کریڈٹ، کرپٹو کرنسی، یا کسی بھی قسم کا ٹوکن نہیں دیا جاتا۔",
+    d5:"آپ کے جوابات کیسے استعمال ہوتے ہیں: جوابات کو دوسروں کے ساتھ ملا کر خلاصے کی شکل میں رپورٹ کیا جاتا ہے۔ [یہاں بتائیں کہ ڈیٹا کتنے عرصے تک رکھا جاتا ہے اور اسے کون دیکھ سکتا ہے۔] آپ ہم سے رابطہ کر کے کسی بھی وقت اپنا انفرادی جواب حذف کرنے کے لیے کہہ سکتے ہیں۔",
+    d6:"کسی شکریہ تحفے کے بارے میں: [اگر آپ کوئی چھوٹا شکریہ تحفہ، جیسے پرنٹ شدہ کوپن، دینے کا ارادہ رکھتے ہیں، تو یہاں اس کی درست، معمولی قیمت بیان کریں۔ اسے کبھی بھی سرمایہ کاری، ٹوکن، یا قرض کے طور پر بیان نہیں کیا جانا چاہیے، اور یہ اس بات پر منحصر نہیں ہونا چاہیے کہ کوئی کیا جواب دیتا ہے۔]",
+    d7:"آپ کے حقوق: آپ پوچھ سکتے ہیں کہ ہمارے پاس آپ کا کیا ڈیٹا ہے، اسے درست یا حذف کرنے کے لیے کہہ سکتے ہیں، اور کسی بھی وقت اپنی رضامندی واپس لے سکتے ہیں۔ اس کے لیے اوپر دی گئی تفصیلات استعمال کر کے ہم سے رابطہ کریں۔",
+    consent:"میں نے مندرجہ بالا معلومات پڑھ لی ہیں۔ میں سمجھتا/سمجھتی ہوں کہ یہ رضاکارانہ، مفت ہے، اور میں کسی بھی وقت رک سکتا/سکتی ہوں۔",
+    q1:"آپ اپنی مقامی برادری میں فی الحال دستیاب خدمات سے کتنے مطمئن ہیں؟",
+    "q1-opt-0":"بہت مطمئن","q1-opt-1":"مطمئن","q1-opt-2":"غیر جانبدار","q1-opt-3":"غیر مطمئن","q1-opt-4":"بہت غیر مطمئن",
+    q2:"ان میں سے اس وقت آپ کے لیے سب سے اہم کیا ہے؟",
+    "q2-opt-0":"پانی اور صفائی","q2-opt-1":"صحت کی خدمات تک رسائی","q2-opt-2":"تعلیم","q2-opt-3":"عوامی نقل و حمل","q2-opt-4":"روزگار کے مواقع","q2-opt-5":"حفاظت",
+    q3:"پچھلے ایک سال میں، ان خدمات تک آپ کی رسائی بہتر ہوئی ہے، ویسی ہی رہی ہے، یا خراب ہوئی ہے؟",
+    "q3-opt-0":"بہتر ہوئی","q3-opt-1":"ویسی ہی رہی","q3-opt-2":"خراب ہوئی","q3-opt-3":"یقین نہیں",
+    q4:"اس وقت آپ کے گھرانے کو سب سے بڑا چیلنج کیا درپیش ہے؟",
+    q5:"مقامی پروگراموں یا خدمات کے بارے میں معلومات حاصل کرنے کے لیے آپ کیا ترجیح دیتے ہیں؟",
+    "q5-opt-0":"براہ راست / کمیونٹی میٹنگ میں","q5-opt-1":"فون کال","q5-opt-2":"ایس ایم ایس یا واٹس ایپ","q5-opt-3":"مقامی ریڈیو","q5-opt-4":"اخبار","q5-opt-5":"دیگر",
+    q6:"کیا مستقبل میں اس طرح کے سروے میں حصہ لینے کے لیے آپ تیار ہوں گے؟",
+    "q6-opt-0":"ہاں","q6-opt-1":"نہیں","q6-opt-2":"شاید",
+    q7:"کیا آپ کوئی اور رائے دینا چاہیں گے؟ (اختیاری)"
+  }
+};
+
+// ---------- Render English base ----------
+const disclosureBody = document.getElementById('disclosureBody');
+DISCLOSURE.forEach(item=>{
+  const row = document.createElement('div');
+  row.className = "bilingual-row";
+  row.dataset.id = item.id;
+  row.innerHTML = `
+    <div>
+      <div class="col-label">English</div>
+      <div class="en-text">${item.en}</div>
+    </div>
+    <div class="native-wrap" style="display:none;">
+      <div class="col-label" id="lbl-${item.id}"></div>
+      <div class="native-text" id="native-${item.id}"></div>
+    </div>
+  `;
+  disclosureBody.appendChild(row);
+});
+
+const questionsBody = document.getElementById('questionsBody');
+QUESTIONS.forEach((q,i)=>{
+  const block = document.createElement('div');
+  block.className = "q-block";
+  block.dataset.id = q.id;
+  let inner = `
+    <div class="bilingual-row" data-role="qlabel">
+      <div>
+        <div class="col-label">English</div>
+        <div class="en-text"><span class="q-num">${i+1}</span>${q.label}<button class="q-speak-btn" type="button" data-qid="${q.id}" title="Read this question aloud">🔊</button></div>
+      </div>
+      <div class="native-wrap" style="display:none;">
+        <div class="col-label" id="lbl-${q.id}"></div>
+        <div class="native-text" id="native-${q.id}"><span class="q-num">${i+1}</span><span id="native-text-${q.id}"></span></div>
+      </div>
+    </div>
+  `;
+  if(q.text){
+    inner += `<div class="textarea-wrap">
+      <textarea id="answer-${q.id}" placeholder="Type your answer here…"></textarea>
+      <button class="mic-btn" type="button" data-qid="${q.id}" title="Answer by speaking instead of typing">🎤</button>
+    </div>
+    <div class="mic-unsupported" id="mic-unsupported-${q.id}" style="display:none;">Voice input isn't available in this browser — please type your answer instead.</div>`;
+  }else{
+    inner += `<div class="q-opts">` + q.opts.map((o,oi)=>`
+      <label class="q-opt">
+        <input type="radio" name="${q.id}" value="${o.replace(/"/g,'&quot;')}">
+        <span class="en-text opt-en" data-oi="${oi}">${o}</span>
+        <span class="native-text opt-native" data-oi="${oi}" style="display:none;"></span>
+      </label>
+    `).join("") + `</div>`;
+  }
+  block.innerHTML = inner;
+  questionsBody.appendChild(block);
+});
+
+// ---------- Instant static language switching (no network calls) ----------
+const statusLine = document.getElementById('statusLine');
+let currentLangCode = null; // BCP-47 code for TTS, e.g. "hi-IN"
+
+function showNativeColumns(langLabel){
+  document.querySelectorAll('.native-wrap').forEach(el => el.style.display = "block");
+  document.querySelectorAll('.opt-native').forEach(el => el.style.display = "inline");
+  document.querySelectorAll('.bilingual-row').forEach(el => el.classList.add('two-col'));
+  document.querySelectorAll('[id^="lbl-"]').forEach(el => el.textContent = langLabel);
+}
+
+function hideNativeColumns(){
+  document.querySelectorAll('.native-wrap').forEach(el => el.style.display = "none");
+  document.querySelectorAll('.opt-native').forEach(el => el.style.display = "none");
+  document.querySelectorAll('.bilingual-row').forEach(el => el.classList.remove('two-col'));
+}
+
+langSelect.addEventListener('change', () => {
+  const lang = langSelect.value;
+  if(!lang){
+    hideNativeColumns();
+    statusLine.textContent = "";
+    currentLangCode = null;
+    document.getElementById('keyboardNote').style.display = "none";
+    return;
+  }
+
+  const map = TRANSLATIONS[lang];
+  const langEntry = LANGUAGES.find(l => l[0] === lang);
+  currentLangCode = langEntry ? langEntry[2] : null;
+
+  if(!map){
+    statusLine.textContent = lang + " isn't included in this offline build yet.";
+    hideNativeColumns();
+    return;
+  }
+
+  showNativeColumns(lang);
+
+  DISCLOSURE.forEach(d => {
+    document.getElementById(`native-${d.id}`).textContent = map[d.id] || "";
+  });
+  document.getElementById('consentNative').style.display = "block";
+  document.getElementById('consentNative').textContent = map['consent'] || "";
+
+  QUESTIONS.forEach(q => {
+    const labelSpan = document.getElementById(`native-text-${q.id}`);
+    if(labelSpan) labelSpan.textContent = map[q.id] || "";
+    if(!q.text){
+      q.opts.forEach((o,oi) => {
+        const optEl = document.querySelector(`.q-block[data-id="${q.id}"] .opt-native[data-oi="${oi}"]`);
+        if(optEl) optEl.textContent = " — " + (map[`${q.id}-opt-${oi}`] || "");
+      });
+    }
+  });
+
+  statusLine.textContent = "Showing English alongside " + lang + ". (Pre-translated — works offline.)";
+  const kbNote = document.getElementById('keyboardNote');
+  kbNote.style.display = "block";
+  kbNote.innerHTML = `<b>Typing in ${lang}:</b> this page doesn't include an on-screen ${lang} keyboard — building one that composes complex conjuncts and vowel signs correctly is easy to get subtly wrong, so instead it relies on your device's own keyboard. Most phones (via Gboard or the default keyboard) and Windows/Mac already support ${lang} input — add it once in your device's language/keyboard settings, and it'll work in any text box here, including this survey.`;
+});
+
+// ---------- Text-to-speech (built into the browser, no network required) ----------
+const ttsSupported = 'speechSynthesis' in window;
+if(!ttsSupported){
+  document.querySelectorAll('.speak-btn, .q-speak-btn').forEach(el => el.style.display = "none");
+}
+
+function speakQueue(texts, langCode){
+  if(!ttsSupported) return;
+  window.speechSynthesis.cancel();
+  texts.filter(Boolean).forEach(t => {
+    const u = new SpeechSynthesisUtterance(t);
+    if(langCode) u.lang = langCode;
+    window.speechSynthesis.speak(u);
+  });
+}
+
+function currentTextFor(id, kind){
+  // kind: 'disclosure' | 'consent' | 'qlabel' | 'qopts'
+  const useNative = !!currentLangCode;
+  if(kind === 'disclosure'){
+    const el = useNative ? document.getElementById(`native-${id}`) : document.querySelector(`.bilingual-row[data-id="${id}"] .en-text`);
+    return el ? el.textContent : "";
+  }
+  if(kind === 'consent'){
+    const el = useNative ? document.getElementById('consentNative') : document.getElementById('consentEn');
+    return el ? el.textContent : "";
+  }
+}
+
+document.getElementById('speakDisclosureBtn').addEventListener('click', () => {
+  const texts = DISCLOSURE.map(d => currentTextFor(d.id, 'disclosure'));
+  speakQueue(texts, currentLangCode || 'en-US');
+});
+
+document.getElementById('speakConsentBtn').addEventListener('click', () => {
+  speakQueue([currentTextFor(null, 'consent')], currentLangCode || 'en-US');
+});
+
+document.getElementById('stopAudioBtn').addEventListener('click', () => {
+  if(ttsSupported) window.speechSynthesis.cancel();
+});
+
+// ---------- Voice input (speech-to-text) for typed answers ----------
+// Important difference from the "read aloud" feature above: text-to-speech runs
+// entirely on-device, but converting *voice into text* relies on your browser's
+// speech recognition service, which in Chrome/Edge sends audio to an online
+// service to transcribe it. So voice input needs an internet connection even
+// though the rest of this survey works offline — typing always works offline.
+const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+let activeRecognition = null;
+
+document.getElementById('questionsBody').addEventListener('click', (e) => {
+  const micBtn = e.target.closest('.mic-btn');
+  if(!micBtn) return;
+  const qid = micBtn.dataset.qid;
+  const textarea = document.getElementById(`answer-${qid}`);
+
+  if(!SpeechRecognitionAPI){
+    document.getElementById(`mic-unsupported-${qid}`).style.display = "block";
+    return;
+  }
+
+  if(activeRecognition){
+    activeRecognition.stop();
+    return;
+  }
+
+  const recognition = new SpeechRecognitionAPI();
+  recognition.lang = currentLangCode || 'en-US';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  micBtn.classList.add('recording');
+  micBtn.textContent = "⏺";
+
+  recognition.onresult = (event) => {
+    const transcript = Array.from(event.results).map(r => r[0].transcript).join(" ");
+    textarea.value = (textarea.value ? textarea.value + " " : "") + transcript;
+  };
+  recognition.onerror = (event) => {
+    console.error("Speech recognition error:", event.error);
+    if(event.error === 'not-allowed' || event.error === 'service-not-allowed'){
+      alert("Microphone access was blocked. Please allow microphone access in your browser to use voice input.");
+    }else if(event.error === 'network'){
+      alert("Voice input needs an internet connection for speech recognition, even though the rest of this page works offline. Please type your answer instead, or try again once you're online.");
+    }
+  };
+  recognition.onend = () => {
+    micBtn.classList.remove('recording');
+    micBtn.textContent = "🎤";
+    activeRecognition = null;
+  };
+
+  activeRecognition = recognition;
+  try{
+    recognition.start();
+  }catch(err){
+    micBtn.classList.remove('recording');
+    micBtn.textContent = "🎤";
+  }
+});
+
+document.getElementById('questionsBody').addEventListener('click', (e) => {
+  const btn = e.target.closest('.q-speak-btn');
+  if(!btn) return;
+  const qid = btn.dataset.qid;
+  const q = QUESTIONS.find(x => x.id === qid);
+  if(!q) return;
+
+  const useNative = !!currentLangCode;
+  const labelEl = useNative
+    ? document.getElementById(`native-${qid}`)
+    : document.querySelector(`.q-block[data-id="${qid}"] .en-text`);
+  const texts = [labelEl ? labelEl.textContent : q.label];
+
+  if(!q.text){
+    q.opts.forEach((o, oi) => {
+      const optEl = document.querySelector(`.q-block[data-id="${qid}"] .${useNative ? 'opt-native' : 'opt-en'}[data-oi="${oi}"]`);
+      let t = optEl ? optEl.textContent : o;
+      t = t.replace(/^—\s*/, ''); // strip the visual dash we prefix native options with
+      texts.push(t);
+    });
+  }
+
+  speakQueue(texts, currentLangCode || 'en-US');
+});
+
+// ---------- Best-effort translation of free-text answers to English ----------
+// Multiple-choice answers never need this — each option's value is already the
+// canonical English text, regardless of which language is displayed. Free-text
+// answers, though, are arbitrary text the person typed, so translating them
+// requires an online call. If there's no connection (e.g. this file opened
+// directly on a laptop with no internet), this fails gracefully and the
+// original text is sent instead, clearly labelled as untranslated.
+async function tryTranslateToEnglish(text, sourceLangName){
+  if(!text || !text.trim() || !sourceLangName) return { translated:text, ok:true };
+  try{
+    const prompt = `Translate the following text from ${sourceLangName} into English. Respond with ONLY the English translation — no commentary, no quotation marks, no preamble.\n\n${text}`;
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 400,
+        messages: [{ role:"user", content: prompt }]
+      })
+    });
+    if(!response.ok) throw new Error("HTTP " + response.status);
+    const data = await response.json();
+    const out = (data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join(" ").trim();
+    return { translated: out || text, ok: !!out };
+  }catch(e){
+    console.warn("Free-text translation unavailable (likely no internet connection):", e);
+    return { translated:text, ok:false };
+  }
+}
+
+// ---------- Submit: build an English-language summary and open it as an email ----------
+document.getElementById('submitBtn').addEventListener('click', async () => {
+  if(!document.getElementById('consentCheck').checked){
+    alert("Please confirm you've read the information above before submitting.");
+    return;
+  }
+  if(activeRecognition) activeRecognition.stop();
+
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Preparing your response…";
+
+  const langName = langSelect.value || null;
+  const lines = [];
+  lines.push("Community Voice — Local Feedback Survey response");
+  lines.push("Language used to answer: " + (langName || "English"));
+  lines.push("");
+
+  for(const q of QUESTIONS){
+    lines.push(q.label);
+    if(q.text){
+      const raw = (document.getElementById(`answer-${q.id}`).value || "").trim();
+      if(!raw){
+        lines.push("(No answer provided)");
+      }else{
+        const result = await tryTranslateToEnglish(raw, langName);
+        if(langName && result.ok){
+          lines.push("English: " + result.translated);
+          lines.push("Original (" + langName + "): " + raw);
+        }else if(langName){
+          lines.push("Original (" + langName + ", NOT machine-translated — no internet connection was available at submission time): " + raw);
+        }else{
+          lines.push(raw);
+        }
+      }
+    }else{
+      // Radio value is always the canonical English option text, regardless of displayed language.
+      const checked = document.querySelector(`input[name="${q.id}"]:checked`);
+      lines.push(checked ? checked.value : "(No answer selected)");
+    }
+    lines.push("");
+  }
+
+  const subject = "Community Voice survey response";
+  const body = lines.join("\n");
+  const mailtoUrl = `mailto:gkbharta44@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+  submitBtn.disabled = false;
+  submitBtn.textContent = "Submit my response";
+
+  document.querySelector('.wrap').querySelectorAll('section.card, .no-scheme-banner, .placeholder-note').forEach(el => el.style.display = "none");
+  document.getElementById('thankyou').style.display = "block";
+
+  window.location.href = mailtoUrl;
+});
+</script>
+</body>
+</html>
